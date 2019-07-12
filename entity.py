@@ -8,4 +8,3 @@ class Entity:
 	def move(self, dx, dy):
 		self.x += dx
 		self.y += dy
-		print(self.x, self.y)

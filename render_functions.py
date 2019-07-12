@@ -4,12 +4,18 @@ def render_all(con, entities, game_map, screen_width, screen_height, colors):
 	# Draw all the tiles in the game map
 	for y in range(game_map.height):
 		for x in range(game_map.width):
-			wall = game_map.tiles[x][y].block_sight
+			name = game_map.tilename(x, y)
 
-			if wall:
+			if name == 'wall':
 				libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
-			else:
+			elif name == 'ground':
 				libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
+			elif name == 'water':
+				libtcod.console_set_char_background(con, x, y, colors.get('dark_water'), libtcod.BKGND_SET)
+			elif name == 'tree':
+				libtcod.console_set_char_background(con, x, y, colors.get('dark_tree'), libtcod.BKGND_SET)
+			elif name == 'exit':
+				libtcod.console_set_char_background(con, x, y, libtcod.yellow, libtcod.BKGND_SET)
 
 	# Draw all entities in the list
 	for entity in entities:
