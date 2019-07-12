@@ -41,7 +41,7 @@ class GameMap:
 		return newmap
 
 	def settile(self, point, tile):
-		self.tiles[point[1] * self.width + point[0]] = tile
+		self.tiles[point[1] * self.width + point[0]] = tile.copy()
 
 	def getgroundtiles(self):
 		result = []
