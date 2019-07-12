@@ -1,6 +1,8 @@
 from map_objects.tile import Tile
 import random
 from math import sqrt
+from entity import Entity
+import tcod as libtcod
 
 wall = Tile('wall', True)
 ground = Tile('ground', False)
@@ -44,25 +46,24 @@ class GameMap:
 		self.tiles[point[1] * self.width + point[0]] = tile.copy()
 
 	def getgroundtiles(self):
+		result = self.gettilesbytype('ground')
+		return result
+
+	def gettilesbytype(self, tilename):
 		result = []
 		for i in range(self.width):
 			for j in range(self.height):
 				point = tuple([i, j])
-				if (self.tilename(*point) == ground.name):
+				if (self.tilename(*point) == tilename):
 					result.append(point)
 		# order: top to bottom -> left to right
 		return result
 
-	def setexit(self, dir, point):
-		assert(dir in self.exits), "map exit direction does not exist"
-		if (self.exits[dir] != None and self.tilename(*self.exits[dir]) == exit.name):
-			self.settile(self.exits[dir], wall)
-		self.exits[dir] = point
-		self.settile(point, exit)
-
-	def generate(self, top=False, bottom=False, left=False, right=False):
+	def generate(self, entities, player, max_monsters_per_room, top=False, bottom=False, left=False, right=False):
 		self.tiles = self.cellularautomata().tiles
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
+		player.x, player.y = self.playerspawn(entities)
+		self.placeentities(entities, max_monsters_per_room)
 
 	def inbounds(self, x, y, buffer=0):
 		return (x < self.width - buffer and
@@ -104,12 +105,43 @@ class GameMap:
 
 		return len(result)
 
-	def playerspawn(self):
+	def playerspawn(self, entities):
 		groundtiles = self.getgroundtiles()
 		pos = random.choice(groundtiles)
-		while (not self.checkexit(pos)):
+		while (not self.checkexit(pos) and 
+				not any([entity for entity in entities 
+				if entity.x == x and entity.y == y])):
 			pos = random.choice(groundtiles)
 		return pos
+
+	def placeentities(self, entities, max_monsters_per_room):
+		nummonsters = random.randint(0, int(max_monsters_per_room / 2)) + \
+			random.randint(0, int(max_monsters_per_room / 2))
+		groundtiles = []
+		if (nummonsters > 0):
+			groundtiles = [tile for tile in \
+				self.getgroundtiles() if \
+				self.adjacenttile(tile, ground) >= 4]
+			print(len(groundtiles))
+		else:
+			return
+
+		for i in range(nummonsters):
+			pos = random.choice(groundtiles)
+
+			if not any([entity for entity in entities 
+				if entity.x == pos[0] and entity.y == pos[1]]):
+				monster = None
+				# orcs and trolls, for now ###
+				if random.randint(0, 100) < 80:
+					monster = Entity(pos[0], pos[1], 'o', 
+						libtcod.desaturated_green, 'Orc', blocks=True)
+				else:
+					monster = Entity(pos[0], pos[1], 't', 
+						libtcod.darker_green, 'Troll', blocks=True)
+				##############################
+				entities.append(monster)
+
 
 	def checkexit(self, exit):
 		groundtiles = self.getgroundtiles()
@@ -123,6 +155,13 @@ class GameMap:
 			return True
 		else:
 			return False
+
+	def setexit(self, dir, point):
+		assert(dir in self.exits), "map exit direction does not exist"
+		if (self.exits[dir] != None and self.tilename(*self.exits[dir]) == exit.name):
+			self.settile(self.exits[dir], wall)
+		self.exits[dir] = point
+		self.settile(point, exit)
 
 	def setexits(self, top=False, left=True, right=True, bottom=False):
 		# draw line in direction to edge with ground tiles
