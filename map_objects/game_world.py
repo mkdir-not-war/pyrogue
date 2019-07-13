@@ -17,44 +17,71 @@ class GameWorld:
 		self.floor_rooms = []
 		self.next_floor_rooms = []
 
-	def loadfirstfloor(self, entities):
-		self.generatefloorrooms(self.floor_rooms, SMALL_FLOOR)
-		self.loadnextfloor(entities)
+	def loadfirstfloor(self, player, entities):
+		self.generatefloorrooms(SMALL_FLOOR)
+		self.loadnextfloor(player, entities)
 
-	def loadnextfloor(self, entities):
+	def loadnextfloor(self, player, entities):
 		self.current_floor += 1
 		# wait for next_floor_rooms to finish generating, if it's not done yet
 		self.floor_rooms = self.next_floor_rooms[:]
 		self.current_room = (0, 0)
 		self.currmap = self.floor_rooms[0]
 		self.next_floor_rooms = []
-		self.currmap.spawnplayer(entities)
+		self.currmap.enter(player, entities)
+		print(len(entities)) #####################################################################
+		self.currmap.spawnplayer(player, entities)
 		# set boss lair entrance in same room as player
+		# kick off generation of next next floor in new thread
 
 	def floorwidth(self, floor):
 		return int(sqrt(len(floor)))
 
 	# fill tiles and exits in size # of gamemaps in floor list of gamemaps
-	def generatefloorrooms(self, floor, size):
-		floor = [GameMap(self.roomwidth, self.roomheight)] * size
+	def generatefloorrooms(self, size):
+		floor = []
+		for roomnum in range(size):
+			floor.append(GameMap(self.roomwidth, self.roomheight))
 		width = int(sqrt(size))
 		height = width # floors are a square of rooms, width = height
 		for y in range(height):
 			for x in range(width):
-				topexit = (x == 0 or
-					y % 2 == 0 or
-					(y % 2 == 1 and x > y))
-				botexit = ((x == 0 and y > 0) or
-					y % 2 == 1 or
-					(y % 2 == 0 and x >= y))
-				rightexit = (y == 0 or
-					x % 2 == 0 or
-					(x % 2 == 1 and y > x))
-				leftexit = ((y == 0 and x > 0) or
-					x % 2 == 1 or
-					(x % 2 == 0 and y >= x))
+
+				topexit = False
+				if (x==0):
+					topexit = True
+				elif (y%2==0):
+					topexit = True
+				elif (x>y):
+					topexit = True
+
+				botexit = False
+				if (x==0 and y>0):
+					botexit = True
+				elif (y%2==1):
+					botexit = True
+				elif (x>0 and y>0 and x>=y):
+					botexit = True
+
+				rightexit = False
+				if (y==0):
+					rightexit = True
+				elif (x%2==0):
+					rightexit = True
+				elif (y>x):
+					rightexit = True
+
+				leftexit = False
+				if (y==0 and x>0):
+					leftexit = True
+				elif (x%2==1):
+					leftexit = True
+				elif (x>0 and y>0 and y>=x):
+					leftexit = True
+
 				floor[x + width * y].generate(
 					top=topexit, bottom=botexit, right=rightexit, left=leftexit)
+		self.next_floor_rooms = floor[:]
 
 	def movetonextroom(self, player, entities, exitdir):
 		entrancedir = None

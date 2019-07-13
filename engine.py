@@ -33,7 +33,7 @@ def main():
 
 	player = Entity(int(screen_width / 2), int(screen_height / 2), 
 		'@', libtcod.white, 'Player', blocks=True)
-	entities = [player]
+	entities = []
 
 	libtcod.console_set_custom_font('arial10x10.png', 
 		libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
@@ -45,6 +45,7 @@ def main():
 
 	# load map and place player
 	game_world = GameWorld(map_width, map_height)
+	game_world.loadfirstfloor(player, entities)
 	'''
 	game_map = GameMap(map_width, map_height)
 	game_map.generate(entities, player, *exits)
@@ -69,7 +70,7 @@ def main():
 				fov_light_walls, fov_algorithm)
 
 		# draw screen
-		render_all(con, entities, game_map, fov_map, fov_recompute, 
+		render_all(con, entities, game_world.currmap, fov_map, fov_recompute, 
 			screen_width, screen_height, colors)
 		fov_recompute = False
 		libtcod.console_flush()
@@ -91,7 +92,7 @@ def main():
 			dest_x = player.x + dx
 			dest_y = player.y + dy
 
-			if not game_map.tileblocked(dest_x, dest_y):
+			if not game_world.currmap.tileblocked(dest_x, dest_y):
 				target = get_blocking_entities_at_location(
 					entities, dest_x, dest_y)
 
@@ -101,6 +102,8 @@ def main():
 				else:
 					player.move(dx, dy)
 					fov_recompute = True
+					for e in entities:
+						print(e.name)
 
 				game_state = GameState.ENEMY_TURN
 

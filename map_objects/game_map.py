@@ -75,12 +75,14 @@ class GameMap:
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
 		# spawn monsters only when you enter the room
 
-	def enter(self, player, entities, entrancedir):
+	def enter(self, player, entities, entrancedir=None):
 		entities = [player]
 		self.spawnexits(entities)
-		if (self.remainingmonsters > 0):
+		if (self.remainingmonsters != 0):
 			self.spawnmonsters(entities)
-		player.x, player.y = self.exits[entrancedir]
+		if (entrancedir):
+			player.x, player.y = self.exits[entrancedir]
+		print(len(entities))############################################
 
 	def inbounds(self, x, y, buffer=0):
 		return (x < self.width - buffer and
@@ -127,7 +129,7 @@ class GameMap:
 		pos = random.choice(groundtiles)
 		while (not self.checkexit(pos) and 
 				not any([entity for entity in entities 
-				if entity.x == x and entity.y == y])):
+				if entity.x == pos[0] and entity.y == pos[1]])):
 			pos = random.choice(groundtiles)
 		player.x, player.y = pos
 		entities.append(player)
@@ -141,7 +143,6 @@ class GameMap:
 			groundtiles = [tile for tile in \
 				self.getgroundtiles() if \
 				self.adjacenttile(tile, ground) >= 4]
-			print(len(groundtiles))
 		else:
 			return
 
@@ -177,11 +178,13 @@ class GameMap:
 
 	def spawnexits(self, entities):
 		for exit in self.exits:
-			door = Entity(self.exits[exit][0], self.exits[exit][1], '>', libtcod.white, 
-				'Door', door=Door(exit))
-			entities.append(door)
+			if (self.exits[exit] != None):
+				door = Entity(self.exits[exit][0], self.exits[exit][1], 
+					'>', libtcod.white, 
+					'Door', door=Door(exit))
+				entities.append(door)
 
-	def setexits(self, top=False, left=True, right=True, bottom=False):
+	def setexits(self, top=False, left=False, right=False, bottom=False):
 		# draw line in direction to edge with ground tiles
 		# check to make sure the exits reach most of the randomsample spots
 		if top:
@@ -195,8 +198,8 @@ class GameMap:
 					mapexit = (xpos, 0)
 					self.exits['top'] = mapexit
 					distfromexit = 0
-				distfromexit += 1
-				self.settile((xpos, distfromexit), ground)			  
+				self.settile((xpos, distfromexit), ground)
+				distfromexit += 1				  
 		if left:
 			ypos = random.choice(range(self.height))
 			mapexit = (0, ypos)
@@ -208,8 +211,8 @@ class GameMap:
 					mapexit = (0, ypos)
 					self.exits['left'] = mapexit
 					distfromexit = 0
-				distfromexit += 1
 				self.settile((distfromexit, ypos), ground) 
+				distfromexit += 1
 		if right:
 			ypos = random.choice(range(self.height))
 			mapexit = (self.width-1, ypos)
@@ -221,8 +224,8 @@ class GameMap:
 					mapexit = (self.width-1, ypos)
 					self.exits['right'] = mapexit
 					distfromexit = 0
-				distfromexit += 1
 				self.settile((self.width-1-distfromexit, ypos), ground)
+				distfromexit += 1
 		if bottom:
 			xpos = random.choice(range(self.width))
 			mapexit = (xpos, self.height-1)
@@ -234,8 +237,8 @@ class GameMap:
 					mapexit = (xpos, self.height-1)
 					self.exits['bottom'] = mapexit
 					distfromexit = 0
-				distfromexit += 1
 				self.settile((xpos, self.height-1-distfromexit), ground)
+				distfromexit += 1
 				
 	def cellularautomata(self):
 		newmap = GameMap(self.width, self.height)
