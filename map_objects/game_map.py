@@ -39,7 +39,7 @@ class GameMap:
 		return tiles
 
 	def tileblocked(self, x, y):
-		if (self.inbounds(x, y) and self.tiles[x + self.width * y].blocked):
+		if (not self.inbounds(x, y) or self.tiles[x + self.width * y].blocked):
 			return True
 		return False
 
@@ -179,10 +179,13 @@ class GameMap:
 
 	def spawnexits(self, entities):
 		for exit in self.exits:
-			if (self.exits[exit] != None):
-				door = Entity(self.exits[exit][0], self.exits[exit][1], 
+			pos = self.exits[exit]
+			if (pos != None):
+				if (self.tileblocked(pos[0], pos[1])):
+					self.settile(pos, ground)
+				door = Entity(pos[0], pos[1], 
 					'>', libtcod.white, 
-					'Door', door=Door(exit))
+					'Door', blocks=True, door=Door(exit))
 				entities.append(door)
 
 	def setexits(self, top=False, left=False, right=False, bottom=False):

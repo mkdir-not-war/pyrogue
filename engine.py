@@ -55,6 +55,9 @@ def main():
 
 	game_state = GameState.PLAYERS_TURN
 
+	# save door/stairs
+	portal = None
+
 	while not libtcod.console_is_window_closed():
 		# poll input
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
@@ -79,7 +82,8 @@ def main():
 		move = action.get('move')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
-		open_door = action.get('open_door')
+		confirm = action.get('confirm')
+		cancel = action.get('cancel')
 
 		# update
 		if move and game_state == GameState.PLAYERS_TURN:
@@ -92,14 +96,21 @@ def main():
 					entities, dest_x, dest_y)
 
 				if target:
-					print('You kick the ' + target.name + 
-						' in the shins, much to its dismay!')
+					if target.door:
+						print('Open the door? y/n')
+						game_state = GameState.OPEN_DOOR
+						portal = target
+						continue
+					else:
+						print('You kick the ' + target.name + 
+							' in the shins, much to its dismay!')
 				else:
 					player.move(dx, dy)
 					fov_recompute = True
 
 				game_state = GameState.ENEMY_TURN
 
+		'''
 		if open_door and game_state == GameState.PLAYERS_TURN:
 			for entity in entities:
 				if entity.door and entity.x == player.x and entity.y == player.y:
@@ -109,7 +120,20 @@ def main():
 					con.clear()
 					break
 			else: 
-				print("There is no door here.")
+				print("There is no door here."		
+		'''
+		if game_state == GameState.OPEN_DOOR:
+			if confirm:
+				game_world.movetonextroom(player, entities, 
+					portal.door.direction)
+				fov_map = initialize_fov(game_world.currmap)
+				fov_recompute = True
+				con.clear()
+				game_state = GameState.PLAYERS_TURN
+				portal = None		
+			elif cancel:
+				game_state = GameState.PLAYERS_TURN
+				portal = None
 
 		if exit:
 			return True
