@@ -21,10 +21,10 @@ class GameMap:
 		self.tiles = self.initialize_tiles()
 
 		self.exits = {}
-		self.exits['top'] = None
-		self.exits['bottom'] = None
-		self.exits['left'] = None
-		self.exits['right'] = None
+		self.exits['north'] = None
+		self.exits['south'] = None
+		self.exits['west'] = None
+		self.exits['east'] = None
 
 		'''
 		when you return to a room,
@@ -75,14 +75,15 @@ class GameMap:
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
 		# spawn monsters only when you enter the room
 
+	# clear entity list of previous room's entities, fill with this room's entities
 	def enter(self, player, entities, entrancedir=None):
-		entities = [player]
+		entities.clear()
+		entities.append(player)
 		self.spawnexits(entities)
 		if (self.remainingmonsters != 0):
 			self.spawnmonsters(entities)
 		if (entrancedir):
 			player.x, player.y = self.exits[entrancedir]
-		print(len(entities))############################################
 
 	def inbounds(self, x, y, buffer=0):
 		return (x < self.width - buffer and
@@ -124,6 +125,7 @@ class GameMap:
 
 		return len(result)
 
+	# just set player's position upon entering new floor
 	def spawnplayer(self, player, entities):
 		groundtiles = self.getgroundtiles()
 		pos = random.choice(groundtiles)
@@ -132,7 +134,6 @@ class GameMap:
 				if entity.x == pos[0] and entity.y == pos[1]])):
 			pos = random.choice(groundtiles)
 		player.x, player.y = pos
-		entities.append(player)
 
 	def spawnmonsters(self, entities):
 		nummonsters = random.randint(0, int(max_monsters_per_room / 2)) + \
@@ -190,52 +191,52 @@ class GameMap:
 		if top:
 			xpos = random.choice(range(self.width))
 			mapexit = (xpos, 0)
-			self.exits['top'] = mapexit
+			self.exits['north'] = mapexit
 			distfromexit = 0
 			while (not self.checkexit(mapexit)):
 				if (distfromexit >= 5):
 					xpos = random.choice(range(self.width))
 					mapexit = (xpos, 0)
-					self.exits['top'] = mapexit
+					self.exits['north'] = mapexit
 					distfromexit = 0
 				self.settile((xpos, distfromexit), ground)
 				distfromexit += 1				  
 		if left:
 			ypos = random.choice(range(self.height))
 			mapexit = (0, ypos)
-			self.exits['left'] = mapexit
+			self.exits['west'] = mapexit
 			distfromexit = 0
 			while (not self.checkexit(mapexit)):
 				if (distfromexit >= 5):
 					ypos = random.choice(range(self.height))
 					mapexit = (0, ypos)
-					self.exits['left'] = mapexit
+					self.exits['west'] = mapexit
 					distfromexit = 0
 				self.settile((distfromexit, ypos), ground) 
 				distfromexit += 1
 		if right:
 			ypos = random.choice(range(self.height))
 			mapexit = (self.width-1, ypos)
-			self.exits['right'] = mapexit
+			self.exits['east'] = mapexit
 			distfromexit = 0
 			while (not self.checkexit(mapexit)):
 				if (distfromexit >= 5):
 					ypos = random.choice(range(self.height))
 					mapexit = (self.width-1, ypos)
-					self.exits['right'] = mapexit
+					self.exits['east'] = mapexit
 					distfromexit = 0
 				self.settile((self.width-1-distfromexit, ypos), ground)
 				distfromexit += 1
 		if bottom:
 			xpos = random.choice(range(self.width))
 			mapexit = (xpos, self.height-1)
-			self.exits['bottom'] = mapexit
+			self.exits['south'] = mapexit
 			distfromexit = 0
 			while (not self.checkexit(mapexit)):
 				if (distfromexit >= 5):
 					xpos = random.choice(range(self.width))
 					mapexit = (xpos, self.height-1)
-					self.exits['bottom'] = mapexit
+					self.exits['south'] = mapexit
 					distfromexit = 0
 				self.settile((xpos, self.height-1-distfromexit), ground)
 				distfromexit += 1

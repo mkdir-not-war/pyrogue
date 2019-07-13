@@ -29,7 +29,6 @@ class GameWorld:
 		self.currmap = self.floor_rooms[0]
 		self.next_floor_rooms = []
 		self.currmap.enter(player, entities)
-		print(len(entities)) #####################################################################
 		self.currmap.spawnplayer(player, entities)
 		# set boss lair entrance in same room as player
 		# kick off generation of next next floor in new thread
@@ -54,6 +53,8 @@ class GameWorld:
 					topexit = True
 				elif (x>y):
 					topexit = True
+				if (y==height-1):
+					topexit = False
 
 				botexit = False
 				if (x==0 and y>0):
@@ -70,6 +71,8 @@ class GameWorld:
 					rightexit = True
 				elif (y>x):
 					rightexit = True
+				if (x==width-1):
+					rightexit = False
 
 				leftexit = False
 				if (y==0 and x>0):
@@ -103,6 +106,6 @@ class GameWorld:
 		nextroomy = self.current_room[1] + roomvec[1]
 		nextroom = self.floor_rooms[nextroomx + \
 			self.floorwidth(self.floor_rooms) * nextroomy]
-		self.current_room = (nextroomx, nextroomy)
 		nextroom.enter(player, entities, entrancedir)
-
+		self.current_room = (nextroomx, nextroomy)
+		self.currmap = nextroom	

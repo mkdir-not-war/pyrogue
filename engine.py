@@ -46,11 +46,6 @@ def main():
 	# load map and place player
 	game_world = GameWorld(map_width, map_height)
 	game_world.loadfirstfloor(player, entities)
-	'''
-	game_map = GameMap(map_width, map_height)
-	game_map.generate(entities, player, *exits)
-	game_map.spawnplayer(player, entities)
-	'''
 
 	fov_recompute = True
 	fov_map = initialize_fov(game_world.currmap)
@@ -102,15 +97,17 @@ def main():
 				else:
 					player.move(dx, dy)
 					fov_recompute = True
-					for e in entities:
-						print(e.name)
 
 				game_state = GameState.ENEMY_TURN
 
 		if open_door and game_state == GameState.PLAYERS_TURN:
 			for entity in entities:
 				if entity.door and entity.x == player.x and entity.y == player.y:
-					game_world.movetonextroom(player, entity, entity.door.direction)
+					game_world.movetonextroom(player, entities, entity.door.direction)
+					fov_map = initialize_fov(game_world.currmap)
+					fov_recompute = True
+					con.clear()
+					break
 			else: 
 				print("There is no door here.")
 
