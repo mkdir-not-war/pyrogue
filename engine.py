@@ -7,6 +7,7 @@ from game_states import GameState
 from input_handlers import handle_keys
 from render_functions import clear_all, render_all
 from map_objects.game_map import GameMap
+from map_objects.game_world import GameWorld
 
 def main():
 	screen_width = 80
@@ -43,17 +44,15 @@ def main():
 	con = libtcod.console_new(screen_width, screen_height)
 
 	# load map and place player
+	game_world = GameWorld(map_width, map_height)
+	'''
 	game_map = GameMap(map_width, map_height)
-	max_monsters_per_room = 10
-	exits = [False, False, False, False]
-	exits[0] = False
-	exits[1] = True
-	exits[2] = True
-	exits[3] = False
-	game_map.generate(entities, player, max_monsters_per_room, *exits)
+	game_map.generate(entities, player, *exits)
+	game_map.spawnplayer(player, entities)
+	'''
 
 	fov_recompute = True
-	fov_map = initialize_fov(game_map)
+	fov_map = initialize_fov(game_world.currmap)
 
 	key = libtcod.Key()
 	mouse = libtcod.Mouse()
@@ -84,6 +83,7 @@ def main():
 		move = action.get('move')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
+		open_door = action.get('open_door')
 
 		# update
 		if move and game_state == GameState.PLAYERS_TURN:
@@ -103,6 +103,13 @@ def main():
 					fov_recompute = True
 
 				game_state = GameState.ENEMY_TURN
+
+		if open_door and game_state == GameState.PLAYERS_TURN:
+			for entity in entities:
+				if entity.door and entity.x == player.x and entity.y == player.y:
+					game_world.movetonextroom(player, entity, entity.door.direction)
+			else: 
+				print("There is no door here.")
 
 		if exit:
 			return True

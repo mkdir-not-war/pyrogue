@@ -1,11 +1,16 @@
 class Entity:
-	def __init__(self, x, y, char, color, name, blocks=False):
+	def __init__(self, x, y, char, color, name, blocks=False, door=None):
 		self.x = x
 		self.y = y
 		self.char = char
 		self.color = color
 		self.name = name
 		self.blocks = blocks
+
+		self.door = door
+
+		if self.door:
+			self.door.owner = self
 
 	def move(self, dx, dy):
 		self.x += dx
