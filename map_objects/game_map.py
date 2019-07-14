@@ -1,15 +1,18 @@
-from map_objects.tile import Tile
 import random
 from math import sqrt
-from entity import Entity
 import tcod as libtcod
 
 from components.door import Door
+from components.fighter import Fighter
+from components.ai import BasicMonster, astar
+
+from entity import Entity
+from map_objects.tile import Tile
 
 wall = Tile('wall', True)
 ground = Tile('ground', False)
 water = Tile('water', True, False)
-tree = Tile('tree', False, True)
+tree = Tile('tree', False, True, cost=3)
 
 max_monsters_per_room = 12
 
@@ -18,8 +21,9 @@ class GameMap:
 		self.width = width
 		self.height = height
 		self.size = width * height
-		self.tiles = self.initialize_tiles()
+		self.tiles = self.initialize_tiles() # set in generate
 
+		# set exits in generate
 		self.exits = {}
 		self.exits['north'] = None
 		self.exits['south'] = None
@@ -33,6 +37,8 @@ class GameMap:
 		the room, decrement this by one
 		'''
 		self.remainingmonsters = -1
+
+		self.costmap = [] # set in generate
 
 	def initialize_tiles(self):
 		tiles = [Tile('wall', True) for tile in range(self.size)]
@@ -52,6 +58,19 @@ class GameMap:
 			newmap.tiles[i] = self.tiles[i]
 		newmap.exits = self.exits
 		return newmap
+
+	def getcostmap(self):
+		result = []
+		for y in range(self.height):
+			row = []
+			for x in range(self.width):
+				row.append(self.tiles[x + self.width * y].cost)
+			result.append(row)
+		return result
+
+	def getcost(self, x, y):
+		result = self.costmap(x + self.width * y)
+		return result
 
 	def settile(self, point, tile):
 		self.tiles[point[1] * self.width + point[0]] = tile.copy()
@@ -74,6 +93,7 @@ class GameMap:
 		self.tiles = self.cellularautomata().tiles
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
 		# spawn monsters only when you enter the room
+		self.costmap = self.getcostmap()
 
 	# clear entity list of previous room's entities, fill with this room's entities
 	def enter(self, player, entities, entrancedir=None):
@@ -155,9 +175,13 @@ class GameMap:
 				monster = None
 				# orcs and trolls, for now ###
 				if random.randint(0, 100) < 80:
+					fighter_component = Fighter(hp=10, defense=0, power=3)
+					ai_component = BasicMonster(self)
 					monster = Entity(pos[0], pos[1], 'o', 
 						libtcod.desaturated_green, 'Orc', blocks=True)
 				else:
+					fighter_component = Fighter(hp=10, defense=0, power=3)
+					ai_component = BasicMonster(self)
 					monster = Entity(pos[0], pos[1], 't', 
 						libtcod.darker_green, 'Troll', blocks=True)
 				##############################
@@ -170,7 +194,7 @@ class GameMap:
 		numreached = 0
 		total = len(randomsample)
 		for tile in randomsample:
-			if (astar(exit, tile, self) > 0):
+			if (astar(exit, tile, self)):
 				numreached += 1
 		if (numreached >= int(total / 3)):
 			return True
@@ -351,67 +375,3 @@ class GameMap:
 						newmap.settile(point, tree)
 
 		return newmap
-
-def manhattandist(a, b):
-	result = abs(a[0] - b[0]) + abs(a[1] - b[1])
-	return result
-
-def h(start, goal):
-	return manhattandist(start, goal)
-
-def tupleequal(x, y):
-	return x[0] == y[0] and x[1] == y[1]
-
-def neighbors(p, worldmap, travonly=True, buffer=1):
-	x = p[0]
-	y = p[1]
-	result = []
-	if (x - 1 >= buffer):
-		if (not travonly or not worldmap.tileblocked(x-1, y)):
-			result.append(tuple([x-1, y]))
-	if (x + 1 < worldmap.width - buffer):
-		if (not travonly or not worldmap.tileblocked(x+1, y)):
-			result.append(tuple([x+1, y]))
-	if (y - 1 >= buffer):
-		if (not travonly or not worldmap.tileblocked(x, y-1)):
-			result.append(tuple([x, y-1]))
-	if (y + 1 < worldmap.height - buffer):
-		if (not travonly or not worldmap.tileblocked(x, y+1)):
-			result.append(tuple([x, y+1]))
-	return result
-
-def astar(start, goal, worldmap):
-	closedset = []
-	openset = [start]
-	camefrom = {}
-	gScore = {}
-	gScore[start] = 0
-	fScore = {}
-	fScore[start] = h(start, goal)
-
-	while openset:
-		currenti = 0
-		for p in range(len(openset)):
-			if (openset[p] in fScore):
-				if (fScore[openset[p]] < currenti):
-					currenti = p
-		if tupleequal(openset[currenti], goal):
-			return gScore[goal]
-		current = openset[currenti]
-		openset = openset[:currenti] + openset[currenti+1:]
-		closedset.append(current)
-
-		for n in neighbors(current, worldmap):
-			if n in closedset:
-				continue
-			if n not in gScore:
-				gScore[n] = worldmap.size * 10
-			t_gScore = gScore[current] + 1 #+ movecost[worldmap.tilename(*n)]
-			if n not in openset:
-				openset.append(n)
-			elif t_gScore >= gScore[n]:
-				continue
-			camefrom[n] = current
-			gScore[n] = t_gScore
-			fScore[n] = t_gScore + h(n, goal)
-	return -1

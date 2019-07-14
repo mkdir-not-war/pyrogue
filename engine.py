@@ -1,6 +1,7 @@
 import tcod as libtcod
 from random import choice
 
+from components.fighter import Fighter
 from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameState
@@ -31,32 +32,35 @@ def main():
 		'dark_water': libtcod.Color(96, 103, 128)
 	}
 
+	# set up player entity and active entity list
+	figther_component = Fighter(hp=30, defense=2, power=5)
 	player = Entity(int(screen_width / 2), int(screen_height / 2), 
-		'@', libtcod.white, 'Player', blocks=True)
+		'@', libtcod.white, 'Player', blocks=True, fighter=figther_component)
 	entities = []
 
+	# set up console
 	libtcod.console_set_custom_font('arial10x10.png', 
 		libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-
 	libtcod.console_init_root(screen_width, screen_height, 
 		'libtcod tutorial revised', False)
-
 	con = libtcod.console_new(screen_width, screen_height)
 
-	# load map and place player
+	# load map, entities and player
 	game_world = GameWorld(map_width, map_height)
 	game_world.loadfirstfloor(player, entities)
 
+	# player field of vision variables
 	fov_recompute = True
 	fov_map = initialize_fov(game_world.currmap)
 
+	# input variables
 	key = libtcod.Key()
 	mouse = libtcod.Mouse()
 
+	# state variables
 	game_state = GameState.PLAYERS_TURN
-
-	# save door/stairs
 	portal = None
+	dx, dy = (None, None)
 
 	while not libtcod.console_is_window_closed():
 		# poll input
@@ -87,7 +91,7 @@ def main():
 
 		# update
 		if move and game_state == GameState.PLAYERS_TURN:
-			dx, dy = move
+			dx, dy = move # saves dx and dy outside of the while loop too
 			dest_x = player.x + dx
 			dest_y = player.y + dy
 
@@ -110,23 +114,12 @@ def main():
 
 				game_state = GameState.ENEMY_TURN
 
-		'''
-		if open_door and game_state == GameState.PLAYERS_TURN:
-			for entity in entities:
-				if entity.door and entity.x == player.x and entity.y == player.y:
-					game_world.movetonextroom(player, entities, entity.door.direction)
-					fov_map = initialize_fov(game_world.currmap)
-					fov_recompute = True
-					con.clear()
-					break
-			else: 
-				print("There is no door here."		
-		'''
 		if game_state == GameState.OPEN_DOOR:
 			if confirm:
 				game_world.movetonextroom(player, entities, 
 					portal.door.direction)
 				fov_map = initialize_fov(game_world.currmap)
+				player.move(dx, dy) # move one step off the new door
 				fov_recompute = True
 				con.clear()
 				game_state = GameState.PLAYERS_TURN
@@ -144,9 +137,8 @@ def main():
 
 		if game_state == GameState.ENEMY_TURN:
 			for entity in entities:
-				if entity != player:
-					#print('The ' + entity.name + ' ponders.')
-					pass
+				if entity.ai:
+					entity.ai.take_turn()
 			game_state = GameState.PLAYERS_TURN
 
 if __name__ == '__main__':
