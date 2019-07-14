@@ -7,7 +7,7 @@ class RenderOrder(Enum):
 	ITEM = 2
 	ACTOR = 3
 
-def bar_color(value, max_value):
+def bar_color(colors, value, max_value):
 	GREEN_THRESHOLD = 0.5
 	YELLOW_THRESHOLD = 0.2
 	RED_THRESHOLD = 0.0
@@ -16,17 +16,21 @@ def bar_color(value, max_value):
 	color = None
 
 	if (percent_health > GREEN_THRESHOLD):
-		color = libtcod.chartreuse
+		color = colors.get('hp_bar_high')
 	elif (percent_health > YELLOW_THRESHOLD):
-		color = libtcod.gold
-	elif (percent_health > RED_THRESHOLD):
-		color = libtcod.flame
+		color = colors.get('hp_bar_medium')
+	elif (percent_health >= RED_THRESHOLD):
+		color = colors.get('hp_bar_low')
 
 	return color
 
 def render_bar(panel, x, y, total_width, name, value, maximum, 
 	bar_color, back_color):
+	
 	bar_width = int(float(value) / maximum * total_width)
+	if (value > 0):
+		# if any value left, show some color on the bar
+		bar_width = max(bar_width, 1)
 
 	libtcod.console_set_default_background(panel, back_color)
 	libtcod.console_rect(panel, x, y, total_width, 
@@ -98,9 +102,9 @@ def render_all(con, panel, entities, player, game_map,
 	libtcod.console_set_default_background(panel, libtcod.black)
 	libtcod.console_clear(panel)
 
-	render_bar(panel, 1, 1, bar_width, 'HP', 
+	render_bar(panel, 4, 1, bar_width, 'HP', 
 		player.fighter.hp, player.fighter.max_hp,
-		bar_color(player.fighter.hp, player.fighter.max_hp), 
+		bar_color(colors, player.fighter.hp, player.fighter.max_hp), 
 		libtcod.grey)
 
 	libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)

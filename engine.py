@@ -16,7 +16,7 @@ def main():
 	screen_height = 50
 
 	# Health/Stats panel parameters
-	bar_width = 20
+	bar_width = 24
 	panel_height = 7
 	panel_y = screen_height - panel_height
 
@@ -36,7 +36,10 @@ def main():
 		'dark_ground': libtcod.Color(128, 75, 60),
 		'dark_wall': libtcod.Color(64, 37, 30),
 		'dark_tree': libtcod.Color(101, 128, 70),
-		'dark_water': libtcod.Color(96, 103, 128)
+		'dark_water': libtcod.Color(96, 103, 128),
+		'hp_bar_high': libtcod.chartreuse,
+		'hp_bar_medium': libtcod.gold,
+		'hp_bar_low': libtcod.flame
 	}
 
 	# set up player entity and active entity list
