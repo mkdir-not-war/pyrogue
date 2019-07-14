@@ -33,7 +33,7 @@ def main():
 	}
 
 	# set up player entity and active entity list
-	figther_component = Fighter(hp=30, defense=2, power=5)
+	figther_component = Fighter(hp=30, defense=1, power=5)
 	player = Entity(int(screen_width / 2), int(screen_height / 2), 
 		'@', libtcod.white, 'Player', blocks=True, fighter=figther_component)
 	entities = []

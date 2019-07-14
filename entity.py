@@ -27,9 +27,11 @@ class Entity:
 		self.x += dx
 		self.y += dy
 
-	def move_towards(self, target_x, target_y, game_map, entities, recalc=False):
+	def move_towards(self, game_map, entities, target, recalc=False):
 		if (self.ai.path is False or recalc):
-			self.ai.path = astar((self.x, self.y), (target_x, target_y), game_map)
+			assert(not target is None)
+			self.ai.path = astar((self.x, self.y), 
+				(target[0], target[1]), game_map)
 
 		if (self.ai.path): 
 			if (len(self.ai.path) > 0):
@@ -38,8 +40,10 @@ class Entity:
 					get_blocking_entities_at_location(entities, x, y)):
 					self.move(x-self.x, y-self.y)
 					self.ai.path.pop(0)
+					return True
 			else:
 				self.ai.path = False
+		return False
 
 
 def get_blocking_entities_at_location(entities, dest_x, dest_y):

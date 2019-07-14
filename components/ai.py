@@ -18,7 +18,7 @@ class AIStates(Enum):
 
 class BasicMonster:
 	def __init__(self, game_map, 
-		attentiveness=4, fov_radius=7, prey=['Player']):
+		attentiveness=5, fov_radius=7, prey=['Player']):
 		self.aistate = AIStates.IDLE
 		self.statefuncs = {
 			AIStates.IDLE: self.take_turn_idle,
@@ -30,8 +30,8 @@ class BasicMonster:
 		self.prey = prey[:]
 
 		self.turnssincetargetseen = -1
-		self.lastknownpos = None
 		self.attentiveness = attentiveness
+		self.lastknownpos = None
 		self.path = False
 
 		self.fov_map = initialize_fov(game_map)
@@ -60,6 +60,7 @@ class BasicMonster:
 			if entity.name in self.prey:
 				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
 					self.targetentity = entity
+					self.turnssincetargetseen = 0
 					self.aistate = AIStates.FOLLOWING
 					break
 		else:
@@ -78,20 +79,46 @@ class BasicMonster:
 		monster = self.owner
 		target = self.targetentity
 
+		# if it sees the target, approach until it can attack
 		if libtcod.map_is_in_fov(self.fov_map, target.x, target.y):
 			if (manhattandist((monster.x, monster.y), 
 				(target.x, target.y)) > 1):
-				monster.move_towards(target.x, target.y, 
-					game_map, entities, recalc=True)
+				print("The %s follows you." % monster.name)
+				monster.move_towards(game_map, entities, 
+					(target.x, target.y), recalc=True)
 				self.fov_recompute = True
 			elif self.targetentity.fighter.hp > 0:
-				print("The %s insults you! Your ego is damaged!" % monster.name)
+				print("The %s insults you! The %s\'s ego is damaged!" % \
+					(monster.name, self.targetentity.name))
 		else:
+			self.lastknownpos = (target.x, target.y)
 			self.aistate = AIStates.SEARCHING
 
 	def take_turn_search(self, game_map, entities):
 		monster = self.owner
-		print("The %s is searching for you..." % monster.name)
+
+		# if it sees a new target, reassign and follow
+		for entity in entities:
+			if entity.name in self.prey:
+				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
+					self.targetentity = entity
+					self.turnssincetargetseen = 0
+					self.aistate = AIStates.FOLLOWING
+					break
+		else:
+			# move towards last known position
+			print("The %s searches for you." % monster.name)
+			end_of_path = not monster.move_towards(
+				game_map, entities, self.lastknownpos)
+			self.fov_recompute = True
+			self.turnssincetargetseen += 1
+			if (self.turnssincetargetseen >= self.attentiveness or
+				end_of_path):
+				print("The %s gave up searching for you." % monster.name)
+				self.turnssincetargetseen = -1
+				self.targetentity = None
+				self.aistate = AIStates.IDLE
+
 
 def manhattandist(a, b):
 	result = abs(a[0] - b[0]) + abs(a[1] - b[1])

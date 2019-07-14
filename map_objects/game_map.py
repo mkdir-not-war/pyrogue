@@ -187,14 +187,15 @@ class GameMap:
 				monster = None
 				# orcs and trolls, for now ###
 				if random.randint(0, 100) < 80:
-					fighter_component = Fighter(hp=10, defense=0, power=3)
+					fighter_component = Fighter(hp=8, defense=0, power=2)
 					ai_component = BasicMonster(self)
 					monster = Entity(pos[0], pos[1], 'o', 
 						libtcod.desaturated_green, 'Orc', blocks=True,
 						fighter=fighter_component, ai=ai_component)
 				else:
 					fighter_component = Fighter(hp=10, defense=0, power=3)
-					ai_component = BasicMonster(self)
+					# trolls hunt orcs
+					ai_component = BasicMonster(self, prey=['Player', 'Orc'])
 					monster = Entity(pos[0], pos[1], 't', 
 						libtcod.darker_green, 'Troll', blocks=True,
 						fighter=fighter_component, ai=ai_component)
