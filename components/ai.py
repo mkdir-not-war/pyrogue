@@ -4,7 +4,7 @@ import tcod as libtcod
 from fov_functions import recompute_fov, initialize_fov
 from enum import Enum
 
-fov_algorithm = FOV_SHADOW
+fov_algorithm = libtcod.FOV_SHADOW
 fov_light_walls = True
 
 class AIStates(Enum):
@@ -13,6 +13,9 @@ class AIStates(Enum):
 	SEARCHING = 3
 
 class BasicMonster:
+	def take_turn_idle(): pass
+	def take_turn_follow(): pass
+	def take_turn_search(): pass
 	statefuncs = {
 		AIStates.IDLE: take_turn_idle,
 		AIStates.FOLLOWING: take_turn_follow,
@@ -102,12 +105,12 @@ def neighbors(p, worldmap, travonly=True, buffer=1):
 
 def reconstruct_path(cameFrom, current):
 	totalpath = [] # don't include current position
-	while current in camefrom:
-		current = camefrom[current]
+	while current in cameFrom:
+		current = cameFrom[current]
 		totalpath.insert(0, current)
 	return totalpath
 
-def astar(start, goal, worldmap):
+def astar(start, goal, worldmap, travonly=True, costs=True):
 	closedset = []
 	openset = [start]
 	camefrom = {}
@@ -128,12 +131,15 @@ def astar(start, goal, worldmap):
 		openset = openset[:currenti] + openset[currenti+1:]
 		closedset.append(current)
 
-		for n in neighbors(current, worldmap):
+		for n in neighbors(current, worldmap, travonly=travonly):
 			if n in closedset:
 				continue
 			if n not in gScore:
 				gScore[n] = worldmap.size * 10
-			t_gScore = gScore[current] + worldmap.getcost(*n)
+			if (costs):
+				t_gScore = gScore[current] + worldmap.getcost(*n)
+			else:
+				t_gScore = gScore[current] + 1
 			if n not in openset:
 				openset.append(n)
 			elif t_gScore >= gScore[n]:

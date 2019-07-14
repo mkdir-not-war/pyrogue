@@ -60,16 +60,11 @@ class GameMap:
 		return newmap
 
 	def getcostmap(self):
-		result = []
-		for y in range(self.height):
-			row = []
-			for x in range(self.width):
-				row.append(self.tiles[x + self.width * y].cost)
-			result.append(row)
+		result = [self.tiles[i].cost for i in range(self.size)]
 		return result
 
 	def getcost(self, x, y):
-		result = self.costmap(x + self.width * y)
+		result = self.costmap[x + self.width * y]
 		return result
 
 	def settile(self, point, tile):
@@ -91,6 +86,7 @@ class GameMap:
 
 	def generate(self, top=False, bottom=False, left=False, right=False):
 		self.tiles = self.cellularautomata().tiles
+		self.costmap = self.getcostmap()
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
 		# spawn monsters only when you enter the room
 		self.costmap = self.getcostmap()
