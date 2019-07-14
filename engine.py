@@ -16,19 +16,6 @@ def main():
 	screen_width = 80
 	screen_height = 50
 
-	# Health/Stats panel parameters
-	bar_offset = 4
-	bar_width = 24
-	panel_height = 7
-	panel_y = screen_height - panel_height
-
-	# Message panel parameters
-	message_x = bar_width + bar_offset + 2
-	message_width = screen_width - bar_width - bar_offset - 2
-	message_height = panel_height - 2
-
-	message_log = MessageLog(message_x, message_width, message_height)
-
 	# Map panel parameters
 	map_width = 45
 	map_height = 40
@@ -36,6 +23,19 @@ def main():
 	fov_algorithm = libtcod.FOV_SHADOW
 	fov_light_walls = True
 	fov_radius = 9
+
+	# Health/Stats panel parameters
+	bar_x = 4
+	bar_width = 24
+	panel_height = screen_height - map_height - 1
+	panel_y = screen_height - panel_height
+
+	# Message panel parameters
+	message_x = bar_width + bar_x + 2
+	message_width = screen_width - bar_width - bar_x - 2
+	message_height = panel_height - 2
+
+	message_log = MessageLog(message_x, message_width, message_height)
 
 	colors = {
 		'light_ground': libtcod.Color(204, 120, 96),
@@ -88,7 +88,9 @@ def main():
 
 	while not libtcod.console_is_window_closed():
 		# poll input
-		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
+		libtcod.sys_check_for_event(
+			libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, 
+			key, mouse)
 
 		# compute field of vision
 		if fov_recompute:
@@ -99,7 +101,7 @@ def main():
 		render_all(con, panel, entities, player, game_world.currmap, 
 			message_log, fov_map, fov_recompute, 
 			screen_width, screen_height, 
-			bar_offset, bar_width, panel_height, panel_y, colors)
+			bar_x, bar_width, panel_height, panel_y, mouse, colors)
 		fov_recompute = False
 		libtcod.console_flush()
 
