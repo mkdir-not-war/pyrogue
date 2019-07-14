@@ -39,6 +39,8 @@ class BasicMonster:
 		self.fov_recompute = True
 
 	def take_turn(self, game_map, entities):
+		results = []
+
 		monster = self.owner
 
 		# recalculate field of vision
@@ -49,9 +51,13 @@ class BasicMonster:
 
 		# call function based on state
 		func = self.statefuncs[self.aistate]
-		func(game_map, entities)
+		results.extend(func(game_map, entities))
+
+		return results
 
 	def take_turn_idle(self, game_map, entities):
+		results = []
+
 		monster = self.owner
 
 		# is there any idle pathing??
@@ -74,8 +80,12 @@ class BasicMonster:
 					monster.move(move[0], move[1])
 					self.fov_recompute = True
 
+		return results
+
 
 	def take_turn_follow(self, game_map, entities):
+		results = []
+
 		monster = self.owner
 		target = self.targetentity
 
@@ -83,42 +93,61 @@ class BasicMonster:
 		if libtcod.map_is_in_fov(self.fov_map, target.x, target.y):
 			if (manhattandist((monster.x, monster.y), 
 				(target.x, target.y)) > 1):
-				print("The %s follows you." % monster.name)
 				monster.move_towards(game_map, entities, 
 					(target.x, target.y), recalc=True)
 				self.fov_recompute = True
-			elif self.targetentity.fighter.hp > 0:
-				print("The %s insults you! The %s\'s ego is damaged!" % \
-					(monster.name, self.targetentity.name))
+			# attack targets that aren't dead
+			elif (not target.fighter is None and 
+				target.fighter.hp > 0):
+				attack_results = monster.fighter.attack(target)
+				results.extend(attack_results)
+			# hang around the corpse for a bit once it dies
+			else:
+				self.lastknownpos = (target.x, target.y)
+				self.aistate = AIStates.SEARCHING
 		else:
 			self.lastknownpos = (target.x, target.y)
 			self.aistate = AIStates.SEARCHING
 
+		return results
+
 	def take_turn_search(self, game_map, entities):
+		results = []
+
 		monster = self.owner
+		target = self.targetentity
 
 		# if it sees a new target, reassign and follow
 		for entity in entities:
-			if entity.name in self.prey:
+			# check that the target isn't dead
+			if entity.name in self.prey and entity.fighter:
 				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
+					if (entity != target):
+						if (target.name != entity.name):
+							results.append({'message': \
+								"The %s spots a %s and loses interest in the %s." % \
+								(monster.name, entity.name, target.name)})
+						else:
+							results.append({'message': \
+								"The %s spots another %s and loses interest in the previous %s." % \
+								(monster.name, entity.name, target.name)})
 					self.targetentity = entity
 					self.turnssincetargetseen = 0
 					self.aistate = AIStates.FOLLOWING
 					break
 		else:
 			# move towards last known position
-			print("The %s searches for you." % monster.name)
 			end_of_path = not monster.move_towards(
 				game_map, entities, self.lastknownpos)
 			self.fov_recompute = True
 			self.turnssincetargetseen += 1
 			if (self.turnssincetargetseen >= self.attentiveness or
 				end_of_path):
-				print("The %s gave up searching for you." % monster.name)
 				self.turnssincetargetseen = -1
 				self.targetentity = None
 				self.aistate = AIStates.IDLE
 
+		return results
 
 def manhattandist(a, b):
 	result = abs(a[0] - b[0]) + abs(a[1] - b[1])

@@ -8,6 +8,7 @@ from components.ai import BasicMonster, astar
 
 from entity import Entity
 from map_objects.tile import Tile
+from render_functions import RenderOrder
 
 wall = Tile('wall', True)
 ground = Tile('ground', False)
@@ -191,6 +192,7 @@ class GameMap:
 					ai_component = BasicMonster(self)
 					monster = Entity(pos[0], pos[1], 'o', 
 						libtcod.desaturated_green, 'Orc', blocks=True,
+						render_order=RenderOrder.ACTOR,
 						fighter=fighter_component, ai=ai_component)
 				else:
 					fighter_component = Fighter(hp=10, defense=0, power=3)
@@ -198,6 +200,7 @@ class GameMap:
 					ai_component = BasicMonster(self, prey=['Player', 'Orc'])
 					monster = Entity(pos[0], pos[1], 't', 
 						libtcod.darker_green, 'Troll', blocks=True,
+						render_order=RenderOrder.ACTOR,
 						fighter=fighter_component, ai=ai_component)
 				##############################
 				entities.append(monster)

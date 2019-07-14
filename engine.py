@@ -2,11 +2,12 @@ import tcod as libtcod
 from random import choice
 
 from components.fighter import Fighter
+from death_functions import kill_monster, kill_player
 from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameState
 from input_handlers import handle_keys
-from render_functions import clear_all, render_all
+from render_functions import clear_all, render_all, RenderOrder
 from map_objects.game_map import GameMap
 from map_objects.game_world import GameWorld
 
@@ -33,9 +34,10 @@ def main():
 	}
 
 	# set up player entity and active entity list
-	figther_component = Fighter(hp=30, defense=1, power=5)
+	fighter_component = Fighter(hp=30, defense=1, power=5)
 	player = Entity(int(screen_width / 2), int(screen_height / 2), 
-		'@', libtcod.white, 'Player', blocks=True, fighter=figther_component)
+		'@', libtcod.white, 'Player', 
+		render_order=RenderOrder.ACTOR, blocks=True, fighter=fighter_component)
 	entities = []
 
 	# set up console
@@ -72,7 +74,8 @@ def main():
 				fov_light_walls, fov_algorithm)
 
 		# draw screen
-		render_all(con, entities, game_world.currmap, fov_map, fov_recompute, 
+		render_all(con, entities, player, game_world.currmap, 
+			fov_map, fov_recompute, 
 			screen_width, screen_height, colors)
 		fov_recompute = False
 		libtcod.console_flush()
@@ -90,6 +93,8 @@ def main():
 		cancel = action.get('cancel')
 		wait = action.get('wait')
 
+		player_turn_results = []
+
 		# update
 		if move and game_state == GameState.PLAYERS_TURN:
 			dx, dy = move # saves dx and dy outside of the while loop too
@@ -102,21 +107,19 @@ def main():
 
 				if target:
 					if target.door:
-						print('Open the door? y/n')
+						player_turn_results.extend(
+							[{'message': 'Open the door? y/n'}])
 						game_state = GameState.OPEN_DOOR
 						portal = target
-						continue
 					else:
-						print('You kick the ' + target.name + 
-							' in the shins, much to its dismay!')
+						attack_results = player.fighter.attack(target)
+						player_turn_results.extend(attack_results)
 				else:
 					player.move(dx, dy)
 					fov_recompute = True
 
-				game_state = GameState.ENEMY_TURN
-
-		if wait and game_state == GameState.PLAYERS_TURN:
-			game_state = GameState.ENEMY_TURN
+				if (game_state == GameState.PLAYERS_TURN):
+					game_state = GameState.ENEMY_TURN
 
 		if game_state == GameState.OPEN_DOOR:
 			if confirm:
@@ -132,6 +135,9 @@ def main():
 				game_state = GameState.PLAYERS_TURN
 				portal = None
 
+		if wait and game_state == GameState.PLAYERS_TURN:
+			game_state = GameState.ENEMY_TURN
+
 		if exit:
 			return True
 
@@ -139,11 +145,49 @@ def main():
 			libtcod.console_set_fullscreen(
 				not libtcod.console_is_fullscreen())
 
+		for player_turn_result in player_turn_results:
+			message = player_turn_result.get('message')
+			dead_entity = player_turn_result.get('dead')
+
+			if message:
+				print(message)
+
+			if dead_entity:
+				if dead_entity == player:
+					message, game_state = kill_player(dead_entity)
+				else:
+					message = kill_monster(dead_entity)
+
+				print(message)
+
 		if game_state == GameState.ENEMY_TURN:
 			for entity in entities:
 				if entity.ai:
-					entity.ai.take_turn(game_world.currmap, entities)
-			game_state = GameState.PLAYERS_TURN
+					enemy_turn_results = entity.ai.take_turn(
+						game_world.currmap, entities)
+
+					for enemy_turn_result in enemy_turn_results:
+						message = enemy_turn_result.get('message')
+						dead_entity = enemy_turn_result.get('dead')
+
+						if message:
+							print(message)
+
+						if dead_entity:
+							if dead_entity == player:
+								message, game_state = kill_player(dead_entity)
+							else:
+								message = kill_monster(dead_entity)
+
+							print(message)
+
+							if game_state == GameState.PLAYER_DEAD:
+								break
+
+					if game_state == GameState.PLAYER_DEAD:
+						break
+			else:
+				game_state = GameState.PLAYERS_TURN
 
 if __name__ == '__main__':
 	main()

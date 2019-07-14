@@ -1,7 +1,9 @@
-from components.ai import astar
+import components.ai as AI
+
+from render_functions import RenderOrder
 
 class Entity:
-	def __init__(self, x, y, char, color, name, 
+	def __init__(self, x, y, char, color, name, render_order=RenderOrder.CORPSE,
 		blocks=False, fighter=None, ai=None, door=None):
 
 		self.x = x
@@ -9,6 +11,7 @@ class Entity:
 		self.char = char
 		self.color = color
 		self.name = name
+		self.render_order = render_order
 		self.blocks = blocks
 		self.fighter = fighter
 		self.ai = ai
@@ -30,7 +33,7 @@ class Entity:
 	def move_towards(self, game_map, entities, target, recalc=False):
 		if (self.ai.path is False or recalc):
 			assert(not target is None)
-			self.ai.path = astar((self.x, self.y), 
+			self.ai.path = AI.astar((self.x, self.y), 
 				(target[0], target[1]), game_map)
 
 		if (self.ai.path): 
