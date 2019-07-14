@@ -7,8 +7,44 @@ class RenderOrder(Enum):
 	ITEM = 2
 	ACTOR = 3
 
-def render_all(con, entities, player, game_map, 
-	fov_map, fov_recompute, screen_width, screen_height, colors):
+def bar_color(value, max_value):
+	GREEN_THRESHOLD = 0.5
+	YELLOW_THRESHOLD = 0.2
+	RED_THRESHOLD = 0.0
+
+	percent_health = float(value) / float(max_value)
+	color = None
+
+	if (percent_health > GREEN_THRESHOLD):
+		color = libtcod.chartreuse
+	elif (percent_health > YELLOW_THRESHOLD):
+		color = libtcod.gold
+	elif (percent_health > RED_THRESHOLD):
+		color = libtcod.flame
+
+	return color
+
+def render_bar(panel, x, y, total_width, name, value, maximum, 
+	bar_color, back_color):
+	bar_width = int(float(value) / maximum * total_width)
+
+	libtcod.console_set_default_background(panel, back_color)
+	libtcod.console_rect(panel, x, y, total_width, 
+		1, False, libtcod.BKGND_SET)
+
+	libtcod.console_set_default_background(panel, bar_color)
+	if bar_width > 0:
+		libtcod.console_rect(panel, x, y, bar_width, 
+			1, False, libtcod.BKGND_SET)
+
+	libtcod.console_set_default_foreground(panel, libtcod.black)
+	libtcod.console_print_ex(panel, int(x + total_width / 2), y, 
+		libtcod.BKGND_NONE, libtcod.CENTER,
+		'{0}: {1}/{2}'.format(name, value, maximum))
+
+def render_all(con, panel, entities, player, game_map, 
+	fov_map, fov_recompute, screen_width, screen_height, 
+	bar_width, panel_height, panel_y, colors):
 	# Draw all the tiles in the game map
 	if fov_recompute:
 		for y in range(game_map.height):
@@ -57,12 +93,17 @@ def render_all(con, entities, player, game_map,
 	for entity in entities_in_render_order:
 		draw_entity(con, entity, game_map, fov_map)
 
-	libtcod.console_set_default_foreground(con, libtcod.white)
-	libtcod.console_print_ex(con, 1, screen_height - 2, libtcod.BKGND_NONE,
-		libtcod.LEFT, 'HP: {0:02}/{1:02}'.format(
-			player.fighter.hp, player.fighter.max_hp))
-
 	libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
+
+	libtcod.console_set_default_background(panel, libtcod.black)
+	libtcod.console_clear(panel)
+
+	render_bar(panel, 1, 1, bar_width, 'HP', 
+		player.fighter.hp, player.fighter.max_hp,
+		bar_color(player.fighter.hp, player.fighter.max_hp), 
+		libtcod.grey)
+
+	libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
 
 def clear_all(con, entities):

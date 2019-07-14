@@ -15,8 +15,14 @@ def main():
 	screen_width = 80
 	screen_height = 50
 
+	# Health/Stats panel parameters
+	bar_width = 20
+	panel_height = 7
+	panel_y = screen_height - panel_height
+
+	# Map panel parameters
 	map_width = 45
-	map_height = 45
+	map_height = 40
 
 	fov_algorithm = libtcod.FOV_SHADOW
 	fov_light_walls = True
@@ -44,8 +50,12 @@ def main():
 	libtcod.console_set_custom_font('arial10x10.png', 
 		libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 	libtcod.console_init_root(screen_width, screen_height, 
-		'libtcod tutorial revised', False)
-	con = libtcod.console_new(screen_width, screen_height)
+		'libtcod tutorial revised', False, 
+		libtcod.RENDERER_SDL2, vsync=True)
+
+	# set up all panels
+	con = libtcod.console.Console(screen_width, screen_height)
+	panel = libtcod.console.Console(screen_width, panel_height)
 
 	# load map, entities and player
 	game_world = GameWorld(map_width, map_height)
@@ -74,9 +84,10 @@ def main():
 				fov_light_walls, fov_algorithm)
 
 		# draw screen
-		render_all(con, entities, player, game_world.currmap, 
+		render_all(con, panel, entities, player, game_world.currmap, 
 			fov_map, fov_recompute, 
-			screen_width, screen_height, colors)
+			screen_width, screen_height, 
+			bar_width, panel_height, panel_y, colors)
 		fov_recompute = False
 		libtcod.console_flush()
 
