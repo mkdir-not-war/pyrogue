@@ -33,11 +33,10 @@ class Entity:
 
 		if (self.ai.path): 
 			if (len(self.ai.path) > 0):
-				dx, dy = self.ai.path[0]
-
-				if not (game_map.tileblocked(dx, dy) or
-					get_blocking_entities_at_location(entities, dx, dy)):
-					self.move(dx, dy)
+				x, y = self.ai.path[0]
+				if not (game_map.tileblocked(x, y) or
+					get_blocking_entities_at_location(entities, x, y)):
+					self.move(x-self.x, y-self.y)
 					self.ai.path.pop(0)
 			else:
 				self.ai.path = False

@@ -18,7 +18,7 @@ class AIStates(Enum):
 
 class BasicMonster:
 	def __init__(self, game_map, 
-		attentiveness=4, fov_radius=7, prey=['Player-test']):
+		attentiveness=4, fov_radius=7, prey=['Player']):
 		self.aistate = AIStates.IDLE
 		self.statefuncs = {
 			AIStates.IDLE: self.take_turn_idle,
@@ -36,7 +36,7 @@ class BasicMonster:
 
 		self.fov_map = initialize_fov(game_map)
 		self.fov_radius = fov_radius
-		self.fov_recompute = False
+		self.fov_recompute = True
 
 	def take_turn(self, game_map, entities):
 		monster = self.owner
@@ -45,6 +45,7 @@ class BasicMonster:
 		if self.fov_recompute:
 			recompute_fov(self.fov_map, monster.x, monster.y, self.fov_radius, 
 				fov_light_walls, fov_algorithm)
+			self.fov_recompute = False
 
 		# call function based on state
 		func = self.statefuncs[self.aistate]
@@ -58,7 +59,9 @@ class BasicMonster:
 		for entity in entities:
 			if entity.name in self.prey:
 				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
-					pass
+					self.targetentity = entity
+					self.aistate = AIStates.FOLLOWING
+					break
 		else:
 			# 50% chance to move aimlessly, otherwise stand still
 			if (choice([True, False]) == True):
@@ -68,14 +71,27 @@ class BasicMonster:
 					not entityfuncs.get_blocking_entities_at_location(
 						entities, dest_x, dest_y)):
 					monster.move(move[0], move[1])
+					self.fov_recompute = True
 
 
 	def take_turn_follow(self, game_map, entities):
 		monster = self.owner
+		target = self.targetentity
+
+		if libtcod.map_is_in_fov(self.fov_map, target.x, target.y):
+			if (manhattandist((monster.x, monster.y), 
+				(target.x, target.y)) > 1):
+				monster.move_towards(target.x, target.y, 
+					game_map, entities, recalc=True)
+				self.fov_recompute = True
+			elif self.targetentity.fighter.hp > 0:
+				print("The %s insults you! Your ego is damaged!" % monster.name)
+		else:
+			self.aistate = AIStates.SEARCHING
 
 	def take_turn_search(self, game_map, entities):
 		monster = self.owner
-
+		print("The %s is searching for you..." % monster.name)
 
 def manhattandist(a, b):
 	result = abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -102,6 +118,7 @@ def vectorsbyclosestangle(target, vecs):
 		square_cos[v] = value
 	return max(square_cos.items(), key=itemgetter(1))
 
+# only cardinal directions
 def neighbors(p, worldmap, travonly=True, buffer=1):
 	x = p[0]
 	y = p[1]
@@ -125,7 +142,7 @@ def reconstruct_path(cameFrom, current):
 	while current in cameFrom:
 		current = cameFrom[current]
 		totalpath.insert(0, current)
-	return totalpath
+	return totalpath[1:]
 
 def astar(start, goal, worldmap, travonly=True, costs=True):
 	closedset = []

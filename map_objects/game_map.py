@@ -32,11 +32,12 @@ class GameMap:
 
 		'''
 		when you return to a room,
-		totally spawn all new enemy entities,
-		unless this is zero. Once you kill an enemy in 
+		totally spawn all new enemy entities, (same amount as original)
+		unless remaining is zero. Once you kill an enemy in 
 		the room, decrement this by one
 		'''
-		self.remainingmonsters = -1
+		self.nummonsters = -1
+		self.remainingmonsters = None
 
 		self.costmap = [] # set in generate
 
@@ -45,7 +46,8 @@ class GameMap:
 		return tiles
 
 	def tileblocked(self, x, y):
-		if (not self.inbounds(x, y) or self.tiles[x + self.width * y].blocked):
+		if (not self.inbounds(x, y) or 
+			self.tiles[x + self.width * y].blocked):
 			return True
 		return False
 
@@ -91,12 +93,13 @@ class GameMap:
 		# spawn monsters only when you enter the room
 		self.costmap = self.getcostmap()
 
-	# clear entity list of previous room's entities, fill with this room's entities
+	# clear entity list of previous room's entities, 
+	# fill with this room's entities
 	def enter(self, player, entities, entrancedir=None):
 		entities.clear()
 		entities.append(player)
 		self.spawnexits(entities)
-		if (self.remainingmonsters != 0):
+		if (self.remainingmonsters is None or self.remainingmonsters > 0):
 			self.spawnmonsters(entities)
 		if (entrancedir):
 			player.x, player.y = self.exits[entrancedir]
@@ -145,25 +148,38 @@ class GameMap:
 	def spawnplayer(self, player, entities):
 		groundtiles = self.getgroundtiles()
 		pos = random.choice(groundtiles)
-		while (not self.checkexit(pos) and 
-				not any([entity for entity in entities 
+
+		while(True):
+			# if no exit possible to reach, find new spot
+			if (not self.checkexit(pos)):
+				pos = random.choice(groundtiles)
+				continue
+			# if spot already has something on it, find new spot
+			if (any([entity for entity in entities 
 				if entity.x == pos[0] and entity.y == pos[1]])):
-			pos = random.choice(groundtiles)
+				pos = random.choice(groundtiles)
+				continue
+			# otherwise, the spot is good for spawnining
+			break
+
 		player.x, player.y = pos
 
 	def spawnmonsters(self, entities):
-		nummonsters = random.randint(0, int(max_monsters_per_room / 2)) + \
-			random.randint(0, int(max_monsters_per_room / 2))
-		self.remainingmonsters = nummonsters
+		if (self.nummonsters < 0):
+			self.nummonsters = random.randint(
+				0, int(max_monsters_per_room / 2)) + \
+				random.randint(0, int(max_monsters_per_room / 2))
+		self.remainingmonsters = self.nummonsters
 		groundtiles = []
-		if (nummonsters > 0):
+		if (self.nummonsters > 0):
 			groundtiles = [tile for tile in \
 				self.getgroundtiles() if \
-				self.adjacenttile(tile, ground) >= 4]
+				self.adjacenttile(tile, ground) >= 4 and \
+				self.inbounds(tile[0], tile[1], buffer=4)]
 		else:
 			return
 
-		for i in range(nummonsters):
+		for i in range(self.nummonsters):
 			pos = random.choice(groundtiles)
 
 			if not any([entity for entity in entities 
