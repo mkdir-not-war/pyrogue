@@ -46,9 +46,9 @@ def render_bar(panel, x, y, total_width, name, value, maximum,
 		libtcod.BKGND_NONE, libtcod.CENTER,
 		'{0}: {1}/{2}'.format(name, value, maximum))
 
-def render_all(con, panel, entities, player, game_map, 
+def render_all(con, panel, entities, player, game_map, message_log,
 	fov_map, fov_recompute, screen_width, screen_height, 
-	bar_width, panel_height, panel_y, colors):
+	bar_offset, bar_width, panel_height, panel_y, colors):
 	# Draw all the tiles in the game map
 	if fov_recompute:
 		for y in range(game_map.height):
@@ -102,7 +102,14 @@ def render_all(con, panel, entities, player, game_map,
 	libtcod.console_set_default_background(panel, libtcod.black)
 	libtcod.console_clear(panel)
 
-	render_bar(panel, 4, 1, bar_width, 'HP', 
+	y = 1
+	for message in message_log.messages:
+		libtcod.console_set_default_foreground(panel, message.color)
+		libtcod.console_print_ex(panel, message_log.x, y, 
+			libtcod.BKGND_NONE, libtcod.LEFT, message.text)
+		y += 1
+
+	render_bar(panel, bar_offset, 1, bar_width, 'HP', 
 		player.fighter.hp, player.fighter.max_hp,
 		bar_color(colors, player.fighter.hp, player.fighter.max_hp), 
 		libtcod.grey)

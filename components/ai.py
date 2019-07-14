@@ -5,6 +5,7 @@ from fov_functions import recompute_fov, initialize_fov
 from enum import Enum
 from random import choice
 import entity as entityfuncs
+from game_messages import Message
 
 fov_algorithm = libtcod.FOV_SHADOW
 fov_light_walls = True
@@ -124,13 +125,13 @@ class BasicMonster:
 				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
 					if (entity != target):
 						if (target.name != entity.name):
-							results.append({'message': \
+							results.append({'message': Message(
 								"The %s spots a %s and loses interest in the %s." % \
-								(monster.name, entity.name, target.name)})
+								(monster.name, entity.name, target.name))})
 						else:
-							results.append({'message': \
+							results.append({'message': Message(
 								"The %s spots another %s and loses interest in the previous %s." % \
-								(monster.name, entity.name, target.name)})
+								(monster.name, entity.name, target.name))})
 					self.targetentity = entity
 					self.turnssincetargetseen = 0
 					self.aistate = AIStates.FOLLOWING
