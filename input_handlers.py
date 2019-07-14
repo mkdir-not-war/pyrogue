@@ -13,6 +13,9 @@ def handle_keys(key):
 	elif key.vk == libtcod.KEY_RIGHT:
 		return {'move': (1, 0)}
 
+	elif key.vk == libtcod.KEY_SPACE:
+		return {'wait': True}
+
 	elif key_char == 'y':
 		return {'confirm': True}
 	elif key_char == 'n':

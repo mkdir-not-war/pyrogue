@@ -3,9 +3,13 @@ from numpy import dot
 import tcod as libtcod
 from fov_functions import recompute_fov, initialize_fov
 from enum import Enum
+from random import choice
+import entity as entityfuncs
 
 fov_algorithm = libtcod.FOV_SHADOW
 fov_light_walls = True
+
+possible_moves = [(0, 1), (1, 0), (-1, 0), (0, -1)]
 
 class AIStates(Enum):
 	IDLE = 1
@@ -13,21 +17,17 @@ class AIStates(Enum):
 	SEARCHING = 3
 
 class BasicMonster:
-	def take_turn_idle(): pass
-	def take_turn_follow(): pass
-	def take_turn_search(): pass
-	statefuncs = {
-		AIStates.IDLE: take_turn_idle,
-		AIStates.FOLLOWING: take_turn_follow,
-		AIStates.SEARCHING: take_turn_search
-	}
-
 	def __init__(self, game_map, 
-		attentiveness=4, fov_radius=7, prey=['Player']):
+		attentiveness=4, fov_radius=7, prey=['Player-test']):
 		self.aistate = AIStates.IDLE
-
+		self.statefuncs = {
+			AIStates.IDLE: self.take_turn_idle,
+			AIStates.FOLLOWING: self.take_turn_follow,
+			AIStates.SEARCHING: self.take_turn_search
+		}
 
 		self.targetentity = None # create ecosystem so player isn't only target
+		self.prey = prey[:]
 
 		self.turnssincetargetseen = -1
 		self.lastknownpos = None
@@ -36,9 +36,9 @@ class BasicMonster:
 
 		self.fov_map = initialize_fov(game_map)
 		self.fov_radius = fov_radius
-		self.recalculate_fov = False
+		self.fov_recompute = False
 
-	def take_turn(self, fov_map, game_map, entities):
+	def take_turn(self, game_map, entities):
 		monster = self.owner
 
 		# recalculate field of vision
@@ -47,17 +47,34 @@ class BasicMonster:
 				fov_light_walls, fov_algorithm)
 
 		# call function based on state
-		func = statefuncs[self.aistate]
-		self.func(fov_map, game_map, entities)
+		func = self.statefuncs[self.aistate]
+		func(game_map, entities)
 
-	def take_turn_idle(self, fov_map, game_map, entities):
-		pass
+	def take_turn_idle(self, game_map, entities):
+		monster = self.owner
 
-	def take_turn_follow(self, fov_map, game_map, entities):
-		pass
+		# is there any idle pathing??
+		# walks around aimlessly until it sees an entity that it considers prey
+		for entity in entities:
+			if entity.name in self.prey:
+				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
+					pass
+		else:
+			# 50% chance to move aimlessly, otherwise stand still
+			if (choice([True, False]) == True):
+				move = choice(possible_moves)
+				dest_x, dest_y = (monster.x + move[0], monster.y + move[1])
+				if (not game_map.tileblocked(dest_x, dest_y) and
+					not entityfuncs.get_blocking_entities_at_location(
+						entities, dest_x, dest_y)):
+					monster.move(move[0], move[1])
 
-	def take_turn_search(self, fov_map, game_map, entities):
-		pass
+
+	def take_turn_follow(self, game_map, entities):
+		monster = self.owner
+
+	def take_turn_search(self, game_map, entities):
+		monster = self.owner
 
 
 def manhattandist(a, b):

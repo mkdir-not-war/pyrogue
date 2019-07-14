@@ -88,6 +88,7 @@ def main():
 		fullscreen = action.get('fullscreen')
 		confirm = action.get('confirm')
 		cancel = action.get('cancel')
+		wait = action.get('wait')
 
 		# update
 		if move and game_state == GameState.PLAYERS_TURN:
@@ -114,6 +115,9 @@ def main():
 
 				game_state = GameState.ENEMY_TURN
 
+		if wait and game_state == GameState.PLAYERS_TURN:
+			game_state = GameState.ENEMY_TURN
+
 		if game_state == GameState.OPEN_DOOR:
 			if confirm:
 				game_world.movetonextroom(player, entities, 
@@ -138,7 +142,7 @@ def main():
 		if game_state == GameState.ENEMY_TURN:
 			for entity in entities:
 				if entity.ai:
-					entity.ai.take_turn()
+					entity.ai.take_turn(game_world.currmap, entities)
 			game_state = GameState.PLAYERS_TURN
 
 if __name__ == '__main__':
