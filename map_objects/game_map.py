@@ -37,6 +37,7 @@ class GameMap:
 
 		self.items = []
 
+		self.biome = None
 		self.costmap = [] # set in generate
 
 	def initialize_tiles(self):
@@ -84,7 +85,8 @@ class GameMap:
 		# order: top to bottom -> left to right
 		return result
 
-	def generate(self, top=False, bottom=False, left=False, right=False):
+	def generate(self, biome, top=False, bottom=False, left=False, right=False):
+		self.biome = biome
 		self.tiles = self.cellularautomata().tiles
 		self.costmap = self.getcostmap()
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
@@ -291,53 +293,23 @@ class GameMap:
 				self.settile((xpos, self.height-1-distfromexit), ground)
 				distfromexit += 1
 				
-	def cellularautomata(self):
+	def cellularautomata(self, biome):
 		newmap = GameMap(self.width, self.height)
 
 		scalemod = self.size / 8000 
 
-		# large rooms, decent forests, small infrequent ponds
-		percentwalls=.34
-		percentwalls += 0.04 * sqrt(scalemod)
-		wallsize=0.9
+		percentwalls = biome.map_params['percentwalls']
+		wallscalemod = biome.map_params['wallscalemod']
+		percentwalls += wallscalemod * sqrt(scalemod)
+		wallsize = biome.map_params['wallsize']
 		
-		percentwater=.006
-		lakesize=0.7
+		percentwater = biome.map_params['percentwater']
+		lakesize = biome.map_params['lakesize']
 		
-		percenttrees=.009
-		forestsize=0.62
+		percenttrees = biome.map_params['percenttrees']
+		forestsize = biome.map_params['forestsize']
 
-		gens = 3
-		
-		'''
-		# cramped rooms, medium forests, smaller more frequent ponds
-		percentwalls=.42
-		percentwalls += 0.04 * sqrt(scalemod)
-		wallsize=0.86
-		
-		percentwater=.02
-		lakesize=0.20
-		
-		percenttrees=.01
-		forestsize=0.60
-
-		gens = 4
-		'''
-
-		'''
-		# huge rooms, decent forests, big ponds
-		percentwalls=.33
-		percentwalls += 0.04 * sqrt(scalemod)
-		wallsize=0.85
-		
-		percentwater=.5
-		lakesize=0.60
-		
-		percenttrees=.007
-		forestsize=0.62
-
-		gens = 3
-		'''
+		gens = biome.map_params['gens']
 
 		# walls
 		for i in range(1, self.width-1):
