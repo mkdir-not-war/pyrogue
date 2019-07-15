@@ -83,8 +83,6 @@ def main():
 
 	# state variables
 	game_state = GameState.PLAYERS_TURN
-	portal = None
-	dx, dy = (None, None)
 
 	while not libtcod.console_is_window_closed():
 		# poll input
@@ -132,11 +130,11 @@ def main():
 
 				if target:
 					if target.door:
-						player_turn_results.extend(
-							[{'message': Message(
-								'Open the door? y/n', libtcod.green)}])
-						game_state = GameState.OPEN_DOOR
-						portal = target
+						game_world.movetonextroom(player, entities, 
+							target.door.direction)
+						fov_map = initialize_fov(game_world.currmap)
+						fov_recompute = True
+						con.clear()
 					else:
 						attack_results = player.fighter.attack(target)
 						player_turn_results.extend(attack_results)
@@ -146,24 +144,6 @@ def main():
 
 				if (game_state == GameState.PLAYERS_TURN):
 					game_state = GameState.ENEMY_TURN
-
-		if game_state == GameState.OPEN_DOOR:
-			if confirm:
-				game_world.movetonextroom(player, entities, 
-					portal.door.direction)
-				fov_map = initialize_fov(game_world.currmap)
-				'''
-				if (not get_blocking_entities_at_location(
-					entities, player.x+dx, player.y+dy)):
-					player.move(dx, dy) # move one step off the new door
-				'''
-				fov_recompute = True
-				con.clear()
-				game_state = GameState.PLAYERS_TURN
-				portal = None		
-			elif cancel:
-				game_state = GameState.PLAYERS_TURN
-				portal = None
 
 		if wait and game_state == GameState.PLAYERS_TURN:
 			game_state = GameState.ENEMY_TURN
