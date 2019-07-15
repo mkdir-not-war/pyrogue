@@ -201,7 +201,7 @@ def reconstruct_path(cameFrom, current):
 		totalpath.insert(0, current)
 	return totalpath[1:]
 
-def astar(start, goal, worldmap, travonly=True, costs=True):
+def astar(start, goal, worldmap, buffer=1, travonly=True, costs=True):
 	closedset = []
 	openset = [start]
 	camefrom = {}
@@ -222,15 +222,18 @@ def astar(start, goal, worldmap, travonly=True, costs=True):
 		openset = openset[:currenti] + openset[currenti+1:]
 		closedset.append(current)
 
-		for n in neighbors(current, worldmap, travonly=travonly):
+		for n in neighbors(current, worldmap, travonly=travonly, buffer=buffer):
 			if n in closedset:
 				continue
 			if n not in gScore:
 				gScore[n] = worldmap.size * 10
+			# only actually keep track of costs if explicitly asked to
 			if (costs):
-				t_gScore = gScore[current] + worldmap.getcost(*n)
+				cost_at_n = worldmap.getcost(n[0], n[1], wallszero=travonly)
+				t_gScore = gScore[current] + cost_at_n
 			else:
 				t_gScore = gScore[current] + 1
+			##########################################################
 			if n not in openset:
 				openset.append(n)
 			elif t_gScore >= gScore[n]:

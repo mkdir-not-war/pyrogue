@@ -45,6 +45,8 @@ class GameWorld:
 		height = width # floors are a square of rooms, width = height
 		for y in range(height):
 			for x in range(width):
+				# pick a biome
+				biomename = 'MEDROOM_MEDFOREST_SMLWATER'
 
 				topexit = False
 				if (x==0):
@@ -82,7 +84,7 @@ class GameWorld:
 				elif (x>0 and y>0 and y>=x):
 					leftexit = True
 
-				floor[x + width * y].generate(
+				floor[x + width * y].generate(biomename,
 					top=topexit, bottom=botexit, right=rightexit, left=leftexit)
 		self.next_floor_rooms = floor[:]
 

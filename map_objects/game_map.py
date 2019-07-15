@@ -9,10 +9,11 @@ from components.ai import BasicMonster, astar
 from entity import Entity
 from map_objects.tile import Tile
 from render_functions import RenderOrder
+from map_objects.biome import biomes
 
 wall = Tile('wall', True)
 ground = Tile('ground', False)
-water = Tile('water', True, False)
+water = Tile('water', True, False, cost=6)
 tree = Tile('tree', False, True, cost=3)
 
 min_monsters_per_room = 0
@@ -37,7 +38,7 @@ class GameMap:
 
 		self.items = []
 
-		self.biome = None
+		self.biomename = None
 		self.costmap = [] # set in generate
 
 	def initialize_tiles(self):
@@ -64,8 +65,16 @@ class GameMap:
 		result = [self.tiles[i].cost for i in range(self.size)]
 		return result
 
-	def getcost(self, x, y):
+	def getcost(self, x, y, wallszero=True, canswim=False):
 		result = self.costmap[x + self.width * y]
+		if (not wallszero):
+			if (result == 0):
+				# walls are finite but super big cost
+				result = self.size
+		if (not canswim):
+			# TODO: entities can drown if they can't swim but try to anyway??
+			if (result == water.cost):
+				result = self.size
 		return result
 
 	def settile(self, point, tile):
@@ -85,8 +94,8 @@ class GameMap:
 		# order: top to bottom -> left to right
 		return result
 
-	def generate(self, biome, top=False, bottom=False, left=False, right=False):
-		self.biome = biome
+	def generate(self, biomename, top=False, bottom=False, left=False, right=False):
+		self.biomename = biomename
 		self.tiles = self.cellularautomata().tiles
 		self.costmap = self.getcostmap()
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
@@ -157,7 +166,7 @@ class GameMap:
 
 		while(True):
 			# if no exit possible to reach, find new spot
-			if (not self.checkexit(pos)):
+			if (not self.check_can_reach_exit(pos)):
 				pos = random.choice(groundtiles)
 				continue
 			# if spot already has something on it, find new spot
@@ -212,19 +221,12 @@ class GameMap:
 				##############################
 				self.monsters.append(monster)
 
-
-	def checkexit(self, exit):
-		groundtiles = self.getgroundtiles()
-		randomsample = random.sample(groundtiles, int(self.size/60))
-		numreached = 0
-		total = len(randomsample)
-		for tile in randomsample:
-			if (astar(exit, tile, self)):
-				numreached += 1
-		if (numreached >= int(total / 3)):
-			return True
-		else:
-			return False
+	def check_can_reach_exit(self, pos):
+		for e in self.exits.values():
+			path = astar(pos, e, self, travonly=True, buffer=0)
+			if path:
+				return True
+		return False
 
 	def spawnexits(self, entities):
 		for exit in self.exits:
@@ -238,65 +240,46 @@ class GameMap:
 				entities.append(door)
 
 	def setexits(self, top=False, left=False, right=False, bottom=False):
-		# draw line in direction to edge with ground tiles
-		# check to make sure the exits reach most of the randomsample spots
+		newexits = []
+
 		if top:
 			xpos = random.choice(range(self.width))
 			mapexit = (xpos, 0)
 			self.exits['north'] = mapexit
-			distfromexit = 0
-			while (not self.checkexit(mapexit)):
-				if (distfromexit >= 5):
-					xpos = random.choice(range(self.width))
-					mapexit = (xpos, 0)
-					self.exits['north'] = mapexit
-					distfromexit = 0
-				self.settile((xpos, distfromexit), ground)
-				distfromexit += 1				  
+			newexits.append(mapexit)	  
 		if left:
 			ypos = random.choice(range(self.height))
 			mapexit = (0, ypos)
 			self.exits['west'] = mapexit
-			distfromexit = 0
-			while (not self.checkexit(mapexit)):
-				if (distfromexit >= 5):
-					ypos = random.choice(range(self.height))
-					mapexit = (0, ypos)
-					self.exits['west'] = mapexit
-					distfromexit = 0
-				self.settile((distfromexit, ypos), ground) 
-				distfromexit += 1
+			newexits.append(mapexit)
 		if right:
 			ypos = random.choice(range(self.height))
 			mapexit = (self.width-1, ypos)
 			self.exits['east'] = mapexit
-			distfromexit = 0
-			while (not self.checkexit(mapexit)):
-				if (distfromexit >= 5):
-					ypos = random.choice(range(self.height))
-					mapexit = (self.width-1, ypos)
-					self.exits['east'] = mapexit
-					distfromexit = 0
-				self.settile((self.width-1-distfromexit, ypos), ground)
-				distfromexit += 1
+			newexits.append(mapexit)
 		if bottom:
 			xpos = random.choice(range(self.width))
 			mapexit = (xpos, self.height-1)
 			self.exits['south'] = mapexit
-			distfromexit = 0
-			while (not self.checkexit(mapexit)):
-				if (distfromexit >= 5):
-					xpos = random.choice(range(self.width))
-					mapexit = (xpos, self.height-1)
-					self.exits['south'] = mapexit
-					distfromexit = 0
-				self.settile((xpos, self.height-1-distfromexit), ground)
-				distfromexit += 1
-				
-	def cellularautomata(self, biome):
+			newexits.append(mapexit)
+
+		# find path (through walls!) from each exit to another exit, 
+		# make each tile along the path ground if it's a wall
+		assert(len(newexits) >= 2) 
+		roomcenter = (int(self.width / 2), int(self.height / 2))
+		for e in newexits:
+			path = astar(e, roomcenter, self, travonly=False, costs=True, buffer=0)
+			for pos in path:
+				# only change walls (assumes player can swim)
+				if (self.tilename(pos[0], pos[1]) == 'wall'):
+					self.settile(pos, ground)
+
+	def cellularautomata(self):
 		newmap = GameMap(self.width, self.height)
 
 		scalemod = self.size / 8000 
+
+		biome = biomes.get(self.biomename)
 
 		percentwalls = biome.map_params['percentwalls']
 		wallscalemod = biome.map_params['wallscalemod']
