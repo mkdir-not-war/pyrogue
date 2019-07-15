@@ -112,7 +112,6 @@ class GameMap:
 			self.spawnmonsters(entities, monsterspawner)
 
 		# place stairs, enemies and items into entities list
-		print(self.monsters)
 		entities.extend(self.spawnexits())
 		entities.extend(self.monsters)
 		entities.extend(self.items)
