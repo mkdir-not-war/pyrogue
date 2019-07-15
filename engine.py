@@ -39,7 +39,12 @@ def main():
 	message_log = MessageLog(message_x, message_width, message_height)
 
 	# set up player entity and active entity list
-	fighter_component = Fighter(hp=30, defense=1, power=5)
+	# TODO: Allow player to assign stats when starting to play
+	fighter_component = Fighter(
+		hp=30, 
+		defense=5, spdefense=5, 
+		attack=5, spattack=5, 
+		speed=5)
 	player = Entity(int(screen_width / 2), int(screen_height / 2), 
 		'@', libtcod.white, 'Player', 
 		render_order=RenderOrder.ACTOR, blocks=True, fighter=fighter_component)
@@ -123,7 +128,8 @@ def main():
 						fov_recompute = True
 						con.clear()
 					else:
-						attack_results = player.fighter.attack(target)
+						attack_results = player.fighter.attacktarget(
+							target, player.fighter.attacks[0])
 						player_turn_results.extend(attack_results)
 				else:
 					player.move(dx, dy)

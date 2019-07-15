@@ -92,20 +92,28 @@ class BasicMonster:
 
 		# if it sees the target, approach until it can attack
 		if libtcod.map_is_in_fov(self.fov_map, target.x, target.y):
-			if (manhattandist((monster.x, monster.y), 
-				(target.x, target.y)) > 1):
-				monster.move_towards(game_map, entities, 
-					(target.x, target.y), recalc=True)
-				self.fov_recompute = True
-			# attack targets that aren't dead
-			elif (not target.fighter is None and 
-				target.fighter.hp > 0):
-				attack_results = monster.fighter.attack(target)
-				results.extend(attack_results)
 			# hang around the corpse for a bit once it dies
-			else:
+			if (target.fighter is None):
 				self.lastknownpos = (target.x, target.y)
 				self.aistate = AIStates.SEARCHING
+			else:
+				# TODO: use attacks more smartly, considering range
+				if (manhattandist((monster.x, monster.y), 
+					(target.x, target.y)) > 1):
+					monster.move_towards(game_map, entities, 
+						(target.x, target.y), recalc=True)
+					self.fov_recompute = True
+				# attack targets that aren't dead
+				elif (not target.fighter is None and 
+					target.fighter.hp > 0):
+					monster_atks = []
+					for atk in monster.fighter.attacks:
+						if (atk.min_range <= 1 and 
+							atk.max_range >= 1):
+							monster_atks.append(atk)
+					attack_results = monster.fighter.attacktarget(
+						target, choice(monster_atks))
+					results.extend(attack_results)				
 		else:
 			self.lastknownpos = (target.x, target.y)
 			self.aistate = AIStates.SEARCHING

@@ -6,6 +6,7 @@ from map_objects.biome import biomes
 from data.colors import colors
 from render_functions import RenderOrder
 
+from components.attack import Attack, attacktype
 from components.fighter import Fighter
 from components.ai import BasicMonster
 from entity import Entity
@@ -87,14 +88,32 @@ class MonsterSpawner():
 		thismonsterdata = species.get(str(monsterlevel))
 		hp = thismonsterdata.get("hp")
 		defense = thismonsterdata.get("defense")
-		power = thismonsterdata.get("power")
+		spdefense = thismonsterdata.get("spdefense")
+		attack = thismonsterdata.get("attack")
+		spattack = thismonsterdata.get("spattack")
+		speed = thismonsterdata.get("speed")
 		name = thismonsterdata.get("name")
 		prey = thismonsterdata.get("prey")
 		char = species.get("char")
 		color = colors.get(self.monsterdata.get("colors").get(monsterlevel))
 
 		# create the monster
-		fighter_component = Fighter(hp=hp, defense=defense, power=power)
+		attacks = []
+		for atkparams in thismonsterdata.get("attacks").values():
+			newatk = Attack(
+				name=atkparams.get('name'),
+				atk_power=int(atkparams.get('atk_power')),
+				min_range=int(atkparams.get('min_range')),
+				max_range=int(atkparams.get('max_range')),
+				atk_type=attacktype(atkparams.get('atk_type')))
+			attacks.append(newatk)
+
+		fighter_component = Fighter(
+			hp=hp, 
+			defense=defense, spdefense=spdefense, 
+			attack=attack, spattack=spattack, 
+			speed=speed,
+			attacks=attacks)
 		ai_component = BasicMonster(game_map, prey=prey)
 		monster = Entity(pos[0], pos[1], 
 			char, 

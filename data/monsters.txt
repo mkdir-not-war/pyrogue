@@ -5,14 +5,38 @@
             "name" : "Young Troll",
             "hp" : 10,
             "defense" : 0,
-            "power" : 3,
+            "spdefense" : 0,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 4,
+            "attacks" : {
+                "0" : {
+                    "name" : "Claws", 
+                    "atk_power" : "4", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player,Young Orc"
         },
         "1" : {
             "name" : "Troll",
             "hp" : 11,
             "defense" : 1,
-            "power" : 4,
+            "spdefense" : 1,
+            "attack" : 4,
+            "spattack" : 1,
+            "speed" : 4,
+            "attacks" : {
+                "0" : {
+                    "name" : "Claws", 
+                    "atk_power" : "4", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player,Young Orc,Orc"
         }
     },
@@ -21,15 +45,39 @@
         "0" : {
             "name" : "Young Orc",
             "hp" : 8,
-            "defense" : 0,
-            "power" : 2,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : "3", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player"
         },
         "1" : {
             "name" : "Orc",
             "hp" : 9,
             "defense" : 1,
-            "power" : 3,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : "3", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player,Young Troll"
         }
     },
@@ -39,21 +87,57 @@
             "name" : "Baazchrak, The Scorned",
             "hp" : 30,
             "defense" : 1,
-            "power" : 3,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 2,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : "3", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player"
         },
         "3" : {
             "name" : "Baazchrak, Redeemed",
             "hp" : 40,
             "defense" : 3,
-            "power" : 8,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 2,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : "3", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player"
         },
         "6" : {
             "name" : "Baazchrak, Perfected",
             "hp" : 60,
             "defense" : 5,
-            "power" : 12,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 2,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : "3", 
+                    "min_range" : "1", 
+                    "max_range" : "1", 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player"
         }
     }
