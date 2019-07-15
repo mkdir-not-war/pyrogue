@@ -28,7 +28,7 @@ class Entity:
 
 		# default description to name
 		if description is None:
-			description = name.capitalize()
+			description = name
 		self.description = description
 
 	def move(self, dx, dy):

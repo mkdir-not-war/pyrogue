@@ -8,7 +8,6 @@ from components.ai import BasicMonster, astar
 
 from entity import Entity
 from map_objects.tile import Tile
-from render_functions import RenderOrder
 from map_objects.biome import biomes
 
 wall = Tile('wall', True)
@@ -104,16 +103,17 @@ class GameMap:
 
 	# clear entity list of previous room's entities, 
 	# fill with this room's entities
-	def enter(self, player, entities, entrancedir=None):
-		# spawn monsters when first enter a room
-		if (self.monsters is None):
-			self.spawnmonsters(entities)
-
+	def enter(self, player, entities, monsterspawner, entrancedir=None):
 		entities.clear()
 		entities.append(player)
 
+		# spawn monsters when first enter a room (only sets self.monsters)
+		if (self.monsters is None):
+			self.spawnmonsters(entities, monsterspawner)
+
 		# place stairs, enemies and items into entities list
-		self.spawnexits(entities)
+		print(self.monsters)
+		entities.extend(self.spawnexits())
 		entities.extend(self.monsters)
 		entities.extend(self.items)
 
@@ -183,7 +183,7 @@ class GameMap:
 
 		player.x, player.y = pos
 
-	def spawnmonsters(self, entities):
+	def spawnmonsters(self, entities, spawner):
 		self.monsters = []
 		nummonsters = random.randint(min_monsters_per_room,
 			int(max_monsters_per_room / 2)) + \
@@ -202,27 +202,7 @@ class GameMap:
 
 			if not any([entity for entity in entities 
 				if entity.x == pos[0] and entity.y == pos[1]]):
-				monster = None
-				# TODO: consult MonsterSpawner for which eneemies to spawn,
-				# also load monster data from json
-
-				# orcs and trolls, for now ###
-				if random.randint(0, 100) < 80:
-					fighter_component = Fighter(hp=8, defense=0, power=2)
-					ai_component = BasicMonster(self)
-					monster = Entity(pos[0], pos[1], 'o', 
-						libtcod.desaturated_green, 'Orc', blocks=True,
-						render_order=RenderOrder.ACTOR,
-						fighter=fighter_component, ai=ai_component)
-				else:
-					fighter_component = Fighter(hp=10, defense=0, power=3)
-					# trolls hunt orcs
-					ai_component = BasicMonster(self, prey=['Player', 'Orc'])
-					monster = Entity(pos[0], pos[1], 't', 
-						libtcod.darker_green, 'Troll', blocks=True,
-						render_order=RenderOrder.ACTOR,
-						fighter=fighter_component, ai=ai_component)
-				##############################
+				monster = spawner.getbasicmonster(self, pos)
 				self.monsters.append(monster)
 
 	def check_can_reach_exit(self, pos):
@@ -232,7 +212,8 @@ class GameMap:
 				return True
 		return False
 
-	def spawnexits(self, entities):
+	def spawnexits(self):
+		result = []
 		for exit in self.exits:
 			pos = self.exits[exit]
 			if (pos != None):
@@ -241,7 +222,8 @@ class GameMap:
 				door = Entity(pos[0], pos[1], 
 					'>', libtcod.white, 
 					'Door', blocks=True, door=Door(exit))
-				entities.append(door)
+				result.append(door)
+		return result
 
 	def setexits(self, top=False, left=False, right=False, bottom=False):
 		newexits = []

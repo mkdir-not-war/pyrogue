@@ -35,13 +35,13 @@ class Fighter:
 		if damage > 0:
 			results.append({'message': Message(
 				'%s attacks the %s for %s hit points.' % \
-				(self.owner.name.capitalize(), target.name, str(damage)),
+				(self.owner.name, target.name, str(damage)),
 				libtcod.white)})
 			results.extend(target.fighter.take_damage(damage))
 		else:
 			results.append({'message': Message(
 				'%s attacks the %s but does no damage.' % \
-				(self.owner.name.capitalize(), target.name),
+				(self.owner.name, target.name),
 				libtcod.white)})
 
 		return results

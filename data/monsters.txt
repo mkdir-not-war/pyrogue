@@ -1,18 +1,60 @@
 {
     "TROLLS": {
-        0 : {
-
+        "char": "t",
+        "0" : {
+            "name" : "Young Troll",
+            "hp" : 10,
+            "defense" : 0,
+            "power" : 3,
+            "prey" : "Player,Young Orc"
         },
-        1 : {
-
+        "1" : {
+            "name" : "Troll",
+            "hp" : 11,
+            "defense" : 1,
+            "power" : 4,
+            "prey" : "Player,Young Orc,Orc"
         }
     },
     "ORCS": {
-        0 : {
-
+        "char": "o",
+        "0" : {
+            "name" : "Young Orc",
+            "hp" : 8,
+            "defense" : 0,
+            "power" : 2,
+            "prey" : "Player"
         },
-        1 : {
-
+        "1" : {
+            "name" : "Orc",
+            "hp" : 9,
+            "defense" : 1,
+            "power" : 3,
+            "prey" : "Player,Young Troll"
+        }
+    },
+    "BOSSES": {
+        "char": "X",
+        "0" : {
+            "name" : "Baazchrak, The Scorned",
+            "hp" : 30,
+            "defense" : 1,
+            "power" : 3,
+            "prey" : "Player"
+        },
+        "3" : {
+            "name" : "Baazchrak, Redeemed",
+            "hp" : 40,
+            "defense" : 3,
+            "power" : 8,
+            "prey" : "Player"
+        },
+        "6" : {
+            "name" : "Baazchrak, Perfected",
+            "hp" : 60,
+            "defense" : 5,
+            "power" : 12,
+            "prey" : "Player"
         }
     }
 }

@@ -2,6 +2,7 @@ import random
 from entity import Entity
 from math import sqrt
 from map_objects.game_map import GameMap
+from map_objects.monsterspawner import MonsterSpawner
 
 SMALL_FLOOR = 4 * 1
 MEDIUM_FLOOR = 4 * 4
@@ -17,6 +18,7 @@ class GameWorld:
 		self.currmap = None
 		self.floor_rooms = []
 		self.next_floor_rooms = []
+		self.monsterspawner = MonsterSpawner()
 
 	def loadfirstfloor(self, player, entities):
 		self.generatefloorrooms(SMALL_FLOOR, self.current_floor)
@@ -30,7 +32,7 @@ class GameWorld:
 		self.current_room = (0, 0)
 		self.currmap = self.floor_rooms[0]
 		self.next_floor_rooms = []
-		self.currmap.enter(player, entities)
+		self.currmap.enter(player, entities, self.monsterspawner)
 		self.currmap.spawnplayer(player, entities)
 		# set boss lair entrance in same room as player
 		# kick off generation of next next floor in new thread
@@ -40,9 +42,9 @@ class GameWorld:
 
 	# fill tiles and exits in size # of gamemaps in floor list of gamemaps
 	def generatefloorrooms(self, size, floor):
-		floor = []
+		floormaps = []
 		for roomnum in range(size):
-			floor.append(GameMap(self.roomwidth, self.roomheight, floor))
+			floormaps.append(GameMap(self.roomwidth, self.roomheight, floor))
 		width = int(sqrt(size))
 		height = width # floors are a square of rooms, width = height
 		for y in range(height):
@@ -86,9 +88,9 @@ class GameWorld:
 				elif (x>0 and y>0 and y>=x):
 					leftexit = True
 
-				floor[x + width * y].generate(biomename,
+				floormaps[x + width * y].generate(biomename,
 					top=topexit, bottom=botexit, right=rightexit, left=leftexit)
-		self.next_floor_rooms = floor[:]
+		self.next_floor_rooms = floormaps[:]
 
 	def movetonextroom(self, player, entities, exitdir):
 		entrancedir = None
@@ -110,6 +112,7 @@ class GameWorld:
 		nextroomy = self.current_room[1] + roomvec[1]
 		nextroom = self.floor_rooms[nextroomx + \
 			self.floorwidth(self.floor_rooms) * nextroomy]
-		nextroom.enter(player, entities, entrancedir)
+		nextroom.enter(
+			player, entities, self.monsterspawner, entrancedir=entrancedir)
 		self.current_room = (nextroomx, nextroomy)
 		self.currmap = nextroom	

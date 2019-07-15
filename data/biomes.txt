@@ -10,7 +10,15 @@
         "gens" : 3,
         "monsterspecies" : {
             "0" : "TROLLS",
-            "1" : "ORCS"
+            "1" : "ORCS",
+            "2" : "ORCS",
+            "3" : "ORCS",
+            "4" : "ORCS",
+            "5" : "ORCS",
+            "6" : "ORCS",
+            "7" : "ORCS",
+            "8" : "ORCS",
+            "9" : "ORCS"
         }
     },
     "SMLROOM_MEDFOREST_MEDWATER": {
@@ -24,7 +32,15 @@
         "gens" : 4,
         "monsterspecies" : {
             "0" : "TROLLS",
-            "1" : "ORCS"
+            "1" : "ORCS",
+            "2" : "ORCS",
+            "3" : "ORCS",
+            "4" : "ORCS",
+            "5" : "ORCS",
+            "6" : "ORCS",
+            "7" : "ORCS",
+            "8" : "ORCS",
+            "9" : "ORCS"
         }
     },
     "LRGROOM_LRGFOREST_LRGWATER": {
@@ -38,7 +54,15 @@
         "gens" : 3,
         "monsterspecies" : {
             "0" : "TROLLS",
-            "1" : "ORCS"
+            "1" : "ORCS",
+            "2" : "ORCS",
+            "3" : "ORCS",
+            "4" : "ORCS",
+            "5" : "ORCS",
+            "6" : "ORCS",
+            "7" : "ORCS",
+            "8" : "ORCS",
+            "9" : "ORCS"
         }
     }
 }

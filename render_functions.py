@@ -34,7 +34,7 @@ def get_names_under_mouse(mouse, entities, fov_map):
 
 	names = ', '.join(names)
 
-	return names.capitalize()
+	return names
 
 def render_bar(panel, x, y, total_width, name, value, maximum, 
 	bar_color, back_color):
@@ -114,7 +114,7 @@ def render_all(con, panel, entities, player, game_map, message_log,
 	libtcod.console_set_default_background(panel, libtcod.black)
 	libtcod.console_clear(panel)
 
-	y = 1
+	y = 2
 	for message in message_log.messages:
 		libtcod.console_set_default_foreground(panel, message.color)
 		libtcod.console_print_ex(panel, message_log.x, y, 
