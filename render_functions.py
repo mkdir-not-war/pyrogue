@@ -1,13 +1,14 @@
 import tcod as libtcod
 
 from enum import Enum
+from data.colors import colors
 
 class RenderOrder(Enum):
 	CORPSE = 1
 	ITEM = 2
 	ACTOR = 3
 
-def bar_color(colors, value, max_value):
+def bar_color(value, max_value):
 	GREEN_THRESHOLD = 0.5
 	YELLOW_THRESHOLD = 0.2
 	RED_THRESHOLD = 0.0
@@ -59,7 +60,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum,
 
 def render_all(con, panel, entities, player, game_map, message_log,
 	fov_map, fov_recompute, screen_width, screen_height, 
-	bar_x, bar_width, panel_height, panel_y, mouse, colors):
+	bar_x, bar_width, panel_height, panel_y, mouse):
 	# Draw all the tiles in the game map
 	if fov_recompute:
 		for y in range(game_map.height):
@@ -122,8 +123,7 @@ def render_all(con, panel, entities, player, game_map, message_log,
 
 	render_bar(panel, bar_x, 4, bar_width, 'HP', 
 		player.fighter.hp, player.fighter.max_hp,
-		bar_color(colors, player.fighter.hp, player.fighter.max_hp), 
-		libtcod.grey)
+		bar_color(player.fighter.hp, player.fighter.max_hp), libtcod.grey)
 
 	libtcod.console_set_default_foreground(panel, libtcod.light_gray)
 	libtcod.console_print_ex(panel, 1, 1, libtcod.BKGND_NONE, libtcod.LEFT,

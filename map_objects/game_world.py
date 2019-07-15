@@ -19,9 +19,10 @@ class GameWorld:
 		self.next_floor_rooms = []
 
 	def loadfirstfloor(self, player, entities):
-		self.generatefloorrooms(SMALL_FLOOR)
+		self.generatefloorrooms(SMALL_FLOOR, self.current_floor)
 		self.loadnextfloor(player, entities)
 
+	# assumes you can only go down, never back up
 	def loadnextfloor(self, player, entities):
 		self.current_floor += 1
 		# wait for next_floor_rooms to finish generating, if it's not done yet
@@ -38,10 +39,10 @@ class GameWorld:
 		return int(sqrt(len(floor)))
 
 	# fill tiles and exits in size # of gamemaps in floor list of gamemaps
-	def generatefloorrooms(self, size):
+	def generatefloorrooms(self, size, floor):
 		floor = []
 		for roomnum in range(size):
-			floor.append(GameMap(self.roomwidth, self.roomheight))
+			floor.append(GameMap(self.roomwidth, self.roomheight, floor))
 		width = int(sqrt(size))
 		height = width # floors are a square of rooms, width = height
 		for y in range(height):

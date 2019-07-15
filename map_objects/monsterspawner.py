@@ -3,9 +3,10 @@ from random import choices
 # choices([list of choices], [list of probability for each choice])
 
 from biome import biomes
+from data.colors import colors
 
 from components.fighter import Fighter
-from components.ai import BasicMonster, astar
+from components.ai import BasicMonster
 from entity import Entity
 
 class MonsterSpawner():
@@ -16,5 +17,5 @@ class MonsterSpawner():
 	def loadmonsterdata(self):
 		pass
 
-	def getmonsters(biomename, nummonsters):
+	def getmonster(self, pos, biomename, floor):
 		pass

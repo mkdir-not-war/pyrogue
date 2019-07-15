@@ -86,7 +86,7 @@ def main():
 		render_all(con, panel, entities, player, game_world.currmap, 
 			message_log, fov_map, fov_recompute, 
 			screen_width, screen_height, 
-			bar_x, bar_width, panel_height, panel_y, mouse, colors)
+			bar_x, bar_width, panel_height, panel_y, mouse)
 		fov_recompute = False
 		libtcod.console_flush()
 

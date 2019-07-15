@@ -20,10 +20,11 @@ min_monsters_per_room = 0
 max_monsters_per_room = 12
 
 class GameMap:
-	def __init__(self, width, height):
+	def __init__(self, width, height, floor):
 		self.width = width
 		self.height = height
 		self.size = width * height
+		self.floor = floor
 		self.tiles = self.initialize_tiles() # set in generate
 
 		# set exits in generate
@@ -55,7 +56,7 @@ class GameMap:
 		return self.tiles[x + self.width * y].name
 
 	def copy(self):
-		newmap = GameMap(self.width, self.height)
+		newmap = GameMap(self.width, self.height, self.floor)
 		for i in range(self.size):
 			newmap.tiles[i] = self.tiles[i]
 		newmap.exits = self.exits
@@ -161,20 +162,23 @@ class GameMap:
 
 	# just set player's position upon entering new floor
 	def spawnplayer(self, player, entities):
-		groundtiles = self.getgroundtiles()
-		pos = random.choice(groundtiles)
+		candidatetiles = self.getgroundtiles()
+		candidatetiles.extend(self.gettilesbytype('tree'))
+		assert(len(candidatetiles) > 0)
+
+		pos = random.choice(candidatetiles)
 
 		while(True):
 			# if no exit possible to reach, find new spot
 			if (not self.check_can_reach_exit(pos)):
-				pos = random.choice(groundtiles)
+				pos = random.choice(candidatetiles)
 				continue
 			# if spot already has something on it, find new spot
 			if (any([entity for entity in entities 
 				if entity.x == pos[0] and entity.y == pos[1]])):
-				pos = random.choice(groundtiles)
+				pos = random.choice(candidatetiles)
 				continue
-			# otherwise, the spot is good for spawnining
+			# otherwise, the spot is good for spawning
 			break
 
 		player.x, player.y = pos
@@ -279,24 +283,24 @@ class GameMap:
 					self.settile(pos, tree)
 
 	def cellularautomata(self):
-		newmap = GameMap(self.width, self.height)
+		newmap = GameMap(self.width, self.height, self.floor)
 
 		scalemod = self.size / 8000 
 
 		biome = biomes.get(self.biomename)
 
-		percentwalls = biome.map_params['percentwalls']
-		wallscalemod = biome.map_params['wallscalemod']
+		percentwalls = biome.params['percentwalls']
+		wallscalemod = biome.params['wallscalemod']
 		percentwalls += wallscalemod * sqrt(scalemod)
-		wallsize = biome.map_params['wallsize']
+		wallsize = biome.params['wallsize']
 		
-		percentwater = biome.map_params['percentwater']
-		lakesize = biome.map_params['lakesize']
+		percentwater = biome.params['percentwater']
+		lakesize = biome.params['lakesize']
 		
-		percenttrees = biome.map_params['percenttrees']
-		forestsize = biome.map_params['forestsize']
+		percenttrees = biome.params['percenttrees']
+		forestsize = biome.params['forestsize']
 
-		gens = biome.map_params['gens']
+		gens = biome.params['gens']
 
 		# walls
 		for i in range(1, self.width-1):

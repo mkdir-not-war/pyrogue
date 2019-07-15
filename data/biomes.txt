@@ -7,7 +7,11 @@
         "lakesize" : 0.7,
         "percenttrees" : 0.009,
         "forestsize" : 0.62,
-        "gens" : 3
+        "gens" : 3,
+        "monsterspecies" : {
+            "0" : "TROLLS",
+            "1" : "ORCS"
+        }
     },
     "SMLROOM_MEDFOREST_MEDWATER": {
         "percentwalls" : 0.42,
@@ -17,7 +21,11 @@
         "lakesize" : 0.2,
         "percenttrees" : 0.01,
         "forestsize" : 0.6,
-        "gens" : 4
+        "gens" : 4,
+        "monsterspecies" : {
+            "0" : "TROLLS",
+            "1" : "ORCS"
+        }
     },
     "LRGROOM_LRGFOREST_LRGWATER": {
         "percentwalls" : 0.33,
@@ -27,6 +35,10 @@
         "lakesize" : 0.6,
         "percenttrees" : 0.007,
         "forestsize" : 0.62,
-        "gens" : 3
+        "gens" : 3,
+        "monsterspecies" : {
+            "0" : "TROLLS",
+            "1" : "ORCS"
+        }
     }
 }
