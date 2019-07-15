@@ -6,6 +6,7 @@ from map_objects.game_map import GameMap
 SMALL_FLOOR = 4 * 1
 MEDIUM_FLOOR = 4 * 4
 LARGE_FLOOR = 4 * 9
+HUGE_FLOOR = 4 * 16
 
 class GameWorld:
 	def __init__(self, roomwidth, roomheight):
@@ -93,10 +94,10 @@ class GameWorld:
 		roomvec = None
 		if (exitdir == 'north'):
 			entrancedir = 'south'
-			roomvec = (0, -1)
+			roomvec = (0, 1)
 		elif (exitdir == 'south'):
 			entrancedir = 'north'
-			roomvec = (0, 1)
+			roomvec = (0, -1)
 		elif (exitdir == 'west'):
 			entrancedir = 'east'
 			roomvec = (-1, 0)

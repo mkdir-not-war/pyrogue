@@ -268,11 +268,14 @@ class GameMap:
 		assert(len(newexits) >= 2) 
 		roomcenter = (int(self.width / 2), int(self.height / 2))
 		for e in newexits:
-			path = astar(e, roomcenter, self, travonly=False, costs=True, buffer=0)
+			path = astar(
+				e, roomcenter, self, travonly=False, costs=True, buffer=0)
 			for pos in path:
 				# only change walls (assumes player can swim)
 				if (self.tilename(pos[0], pos[1]) == 'wall'):
 					self.settile(pos, ground)
+				if (self.tilename(pos[0], pos[1]) == 'water'):
+					self.settile(pos, tree)
 
 	def cellularautomata(self):
 		newmap = GameMap(self.width, self.height)
