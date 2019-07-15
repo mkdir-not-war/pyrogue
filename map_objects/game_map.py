@@ -15,6 +15,7 @@ ground = Tile('ground', False)
 water = Tile('water', True, False)
 tree = Tile('tree', False, True, cost=3)
 
+min_monsters_per_room = 0
 max_monsters_per_room = 12
 
 class GameMap:
@@ -31,14 +32,10 @@ class GameMap:
 		self.exits['west'] = None
 		self.exits['east'] = None
 
-		'''
-		when you return to a room,
-		totally spawn all new enemy entities, (same amount as original)
-		unless remaining is zero. Once you kill an enemy in 
-		the room, decrement this by one
-		'''
-		self.nummonsters = -1
-		self.remainingmonsters = None
+		# includes corpses as well as live monsters
+		self.monsters = None
+
+		self.items = []
 
 		self.costmap = [] # set in generate
 
@@ -91,17 +88,23 @@ class GameMap:
 		self.tiles = self.cellularautomata().tiles
 		self.costmap = self.getcostmap()
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
-		# spawn monsters only when you enter the room
 		self.costmap = self.getcostmap()
 
 	# clear entity list of previous room's entities, 
 	# fill with this room's entities
 	def enter(self, player, entities, entrancedir=None):
+		# spawn monsters when first enter a room
+		if (self.monsters is None):
+			self.spawnmonsters(entities)
+
 		entities.clear()
 		entities.append(player)
+
+		# place stairs, enemies and items into entities list
 		self.spawnexits(entities)
-		if (self.remainingmonsters is None or self.remainingmonsters > 0):
-			self.spawnmonsters(entities)
+		entities.extend(self.monsters)
+		entities.extend(self.items)
+
 		if (entrancedir):
 			player.x, player.y = self.exits[entrancedir]
 
@@ -166,13 +169,12 @@ class GameMap:
 		player.x, player.y = pos
 
 	def spawnmonsters(self, entities):
-		if (self.nummonsters < 0):
-			self.nummonsters = random.randint(
-				0, int(max_monsters_per_room / 2)) + \
-				random.randint(0, int(max_monsters_per_room / 2))
-		self.remainingmonsters = self.nummonsters
+		self.monsters = []
+		nummonsters = random.randint(min_monsters_per_room,
+			int(max_monsters_per_room / 2)) + \
+			random.randint(0, int(max_monsters_per_room / 2))
 		groundtiles = []
-		if (self.nummonsters > 0):
+		if (nummonsters > 0):
 			groundtiles = [tile for tile in \
 				self.getgroundtiles() if \
 				self.adjacenttile(tile, ground) >= 4 and \
@@ -180,12 +182,15 @@ class GameMap:
 		else:
 			return
 
-		for i in range(self.nummonsters):
+		for i in range(nummonsters):
 			pos = random.choice(groundtiles)
 
 			if not any([entity for entity in entities 
 				if entity.x == pos[0] and entity.y == pos[1]]):
 				monster = None
+				# TODO: consult MonsterSpawner for which eneemies to spawn,
+				# also load monster data from json
+
 				# orcs and trolls, for now ###
 				if random.randint(0, 100) < 80:
 					fighter_component = Fighter(hp=8, defense=0, power=2)
@@ -203,7 +208,7 @@ class GameMap:
 						render_order=RenderOrder.ACTOR,
 						fighter=fighter_component, ai=ai_component)
 				##############################
-				entities.append(monster)
+				self.monsters.append(monster)
 
 
 	def checkexit(self, exit):

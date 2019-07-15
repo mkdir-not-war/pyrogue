@@ -152,7 +152,11 @@ def main():
 				game_world.movetonextroom(player, entities, 
 					portal.door.direction)
 				fov_map = initialize_fov(game_world.currmap)
-				player.move(dx, dy) # move one step off the new door
+				'''
+				if (not get_blocking_entities_at_location(
+					entities, player.x+dx, player.y+dy)):
+					player.move(dx, dy) # move one step off the new door
+				'''
 				fov_recompute = True
 				con.clear()
 				game_state = GameState.PLAYERS_TURN
