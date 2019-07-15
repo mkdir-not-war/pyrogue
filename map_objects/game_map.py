@@ -274,6 +274,7 @@ class GameMap:
 				# only change walls (assumes player can swim)
 				if (self.tilename(pos[0], pos[1]) == 'wall'):
 					self.settile(pos, ground)
+				# change water too (if player can't swim)
 				if (self.tilename(pos[0], pos[1]) == 'water'):
 					self.settile(pos, tree)
 

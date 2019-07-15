@@ -1,6 +1,7 @@
 import tcod as libtcod
 from random import choice
 
+from data.colors import colors
 from components.fighter import Fighter
 from death_functions import kill_monster, kill_player
 from entity import Entity, get_blocking_entities_at_location
@@ -36,20 +37,6 @@ def main():
 	message_height = panel_height - 2
 
 	message_log = MessageLog(message_x, message_width, message_height)
-
-	colors = {
-		'light_ground': libtcod.Color(204, 120, 96),
-		'light_wall': libtcod.Color(179, 51, 16),
-		'light_tree': libtcod.Color(143, 181, 100),
-		'light_water': libtcod.Color(191, 205, 255),
-		'dark_ground': libtcod.Color(128, 75, 60),
-		'dark_wall': libtcod.Color(64, 37, 30),
-		'dark_tree': libtcod.Color(101, 128, 70),
-		'dark_water': libtcod.Color(96, 103, 128),
-		'hp_bar_high': libtcod.chartreuse,
-		'hp_bar_medium': libtcod.gold,
-		'hp_bar_low': libtcod.flame
-	}
 
 	# set up player entity and active entity list
 	fighter_component = Fighter(hp=30, defense=1, power=5)
