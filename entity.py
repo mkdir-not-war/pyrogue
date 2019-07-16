@@ -47,6 +47,7 @@ class Entity:
 				if not (game_map.tileblocked(x, y)):
 					if (get_blocking_entities_at_location(entities, x, y)):
 						# entity in the way! Move around it.
+						# TODO: This still doesn't work
 						newmoves = AI.vectorsbyclosestangle(
 							(x, y), AI.possible_moves)
 						for move in newmoves:

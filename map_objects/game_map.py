@@ -208,7 +208,9 @@ class GameMap:
 
 	def check_can_reach_exit(self, pos):
 		for e in self.exits.values():
-			path = astar(pos, e, self, travonly=True, buffer=0)
+			path = False
+			if (not e is None):
+				path = astar(pos, e, self, travonly=True, buffer=0)
 			if path:
 				return True
 		return False

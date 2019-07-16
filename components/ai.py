@@ -18,7 +18,7 @@ class AIStates(Enum):
 	SEARCHING = 3
 
 class BasicMonster:
-	def __init__(self, game_map, 
+	def __init__(self, game_map, truesight=False,
 		attentiveness=5, fov_radius=7, prey=['Player']):
 		self.aistate = AIStates.IDLE
 		self.statefuncs = {
@@ -35,9 +35,19 @@ class BasicMonster:
 		self.lastknownpos = None
 		self.path = False
 
+		self.truesight = truesight
 		self.fov_map = initialize_fov(game_map)
 		self.fov_radius = fov_radius
 		self.fov_recompute = True
+
+	def can_see_entity(self, entity):
+		if (self.truesight):
+			result = (
+				manhattandist((self.owner.x, self.owner.y),
+					(entity.x, entity.y)) < self.fov_radius)
+			return result
+		else:
+			return libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y)
 
 	def take_turn(self, game_map, entities):
 		results = []
@@ -65,7 +75,7 @@ class BasicMonster:
 		# walks around aimlessly until it sees an entity that it considers prey
 		for entity in entities:
 			if entity.name in self.prey:
-				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
+				if self.can_see_entity(entity):
 					self.targetentity = entity
 					self.turnssincetargetseen = 0
 					self.aistate = AIStates.FOLLOWING
@@ -91,7 +101,7 @@ class BasicMonster:
 		target = self.targetentity
 
 		# if it sees the target, approach until it can attack
-		if libtcod.map_is_in_fov(self.fov_map, target.x, target.y):
+		if self.can_see_entity(target):
 			# hang around the corpse for a bit once it dies
 			if (target.fighter is None):
 				self.lastknownpos = (target.x, target.y)
@@ -130,7 +140,7 @@ class BasicMonster:
 		for entity in entities:
 			# check that the target isn't dead
 			if entity.name in self.prey and entity.fighter:
-				if libtcod.map_is_in_fov(self.fov_map, entity.x, entity.y):
+				if self.can_see_entity(entity):
 					if (entity != target):
 						if (target.name != entity.name):
 							results.append({'message': Message(
