@@ -3,6 +3,9 @@
         "char": "t",
         "0" : {
             "name" : "Young Troll",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
             "hp" : 10,
             "defense" : 1,
             "spdefense" : 1,
@@ -12,9 +15,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Claws", 
-                    "atk_power" : "4", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 4, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
@@ -22,6 +25,9 @@
         },
         "1" : {
             "name" : "Troll",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
             "hp" : 11,
             "defense" : 2,
             "spdefense" : 1,
@@ -31,9 +37,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Claws", 
-                    "atk_power" : "4", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 4, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
@@ -44,6 +50,9 @@
         "char": "o",
         "0" : {
             "name" : "Young Orc",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
             "hp" : 8,
             "defense" : 1,
             "spdefense" : 1,
@@ -53,9 +62,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Club", 
-                    "atk_power" : "3", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
@@ -63,6 +72,9 @@
         },
         "1" : {
             "name" : "Orc",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
             "hp" : 9,
             "defense" : 1,
             "spdefense" : 1,
@@ -72,9 +84,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Club", 
-                    "atk_power" : "3", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
@@ -85,6 +97,9 @@
         "char": "X",
         "0" : {
             "name" : "Baazchrak, The Scorned",
+            "fov_radius" : 20,
+            "attentiveness" : 12,
+            "truesight" : "False",
             "hp" : 30,
             "defense" : 1,
             "spdefense" : 1,
@@ -94,9 +109,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Club", 
-                    "atk_power" : "3", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
@@ -104,6 +119,9 @@
         },
         "3" : {
             "name" : "Baazchrak, Redeemed",
+            "fov_radius" : 20,
+            "attentiveness" : 12,
+            "truesight" : "False",
             "hp" : 40,
             "defense" : 3,
             "spdefense" : 1,
@@ -113,9 +131,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Club", 
-                    "atk_power" : "3", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
@@ -123,6 +141,9 @@
         },
         "6" : {
             "name" : "Baazchrak, Perfected",
+            "fov_radius" : 24,
+            "attentiveness" : 18,
+            "truesight" : "True",
             "hp" : 60,
             "defense" : 5,
             "spdefense" : 1,
@@ -132,9 +153,9 @@
             "attacks" : {
                 "0" : {
                     "name" : "Club", 
-                    "atk_power" : "3", 
-                    "min_range" : "1", 
-                    "max_range" : "1", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },

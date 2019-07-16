@@ -86,6 +86,9 @@ class MonsterSpawner():
 		# get the monster's data
 		species = self.monsterdata.get(speciesname)
 		thismonsterdata = species.get(str(monsterlevel))
+		fov_radius = thismonsterdata.get("fov_radius")
+		attentiveness = thismonsterdata.get("attentiveness")
+		truesight = (thismonsterdata.get("truesight") == "True")
 		hp = thismonsterdata.get("hp")
 		defense = thismonsterdata.get("defense")
 		spdefense = thismonsterdata.get("spdefense")
