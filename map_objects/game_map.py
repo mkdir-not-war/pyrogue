@@ -40,9 +40,10 @@ class GameMap:
 
 		self.biomename = None
 		self.costmap = [] # set in generate
+		self.exploredmap = [] # set in generate
 
 	def initialize_tiles(self):
-		tiles = [Tile('wall', True) for tile in range(self.size)]
+		tiles = [wall] * self.size
 		return tiles
 
 	def tileblocked(self, x, y):
@@ -78,7 +79,7 @@ class GameMap:
 		return result
 
 	def settile(self, point, tile):
-		self.tiles[point[1] * self.width + point[0]] = tile.copy()
+		self.tiles[point[1] * self.width + point[0]] = tile
 
 	def getgroundtiles(self):
 		result = self.gettilesbytype('ground')
@@ -98,6 +99,7 @@ class GameMap:
 		self.biomename = biomename
 		self.tiles = self.cellularautomata().tiles
 		self.costmap = self.getcostmap()
+		self.exploredmap = [False] * self.size
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
 		self.costmap = self.getcostmap()
 

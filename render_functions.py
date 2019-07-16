@@ -84,8 +84,8 @@ def render_all(con, panel, entities, player, game_map, message_log,
 					elif name == 'exit':
 						libtcod.console_set_char_background(
 							con, x, y, libtcod.yellow, libtcod.BKGND_SET)
-					game_map.tiles[x + game_map.width * y].explored = True
-				elif game_map.tiles[x + game_map.width * y].explored:
+					game_map.exploredmap[x + game_map.width * y] = True
+				elif game_map.exploredmap[x + game_map.width * y]:
 					if name == 'wall':
 						libtcod.console_set_char_background(
 							con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
@@ -141,7 +141,7 @@ def clear_all(con, entities):
 def draw_entity(con, entity, game_map, fov_map, showall=False):
 	if (libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or 
 		(entity.door and 
-		game_map.tiles[entity.x + game_map.width * entity.y].explored) or
+		game_map.exploredmap[entity.x + game_map.width * entity.y]) or
 		showall):
 		libtcod.console_set_default_foreground(con, entity.color)
 		libtcod.console_put_char(
