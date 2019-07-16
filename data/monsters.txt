@@ -4,8 +4,8 @@
         "0" : {
             "name" : "Young Troll",
             "hp" : 10,
-            "defense" : 0,
-            "spdefense" : 0,
+            "defense" : 1,
+            "spdefense" : 1,
             "attack" : 3,
             "spattack" : 1,
             "speed" : 4,
@@ -23,7 +23,7 @@
         "1" : {
             "name" : "Troll",
             "hp" : 11,
-            "defense" : 1,
+            "defense" : 2,
             "spdefense" : 1,
             "attack" : 4,
             "spattack" : 1,
