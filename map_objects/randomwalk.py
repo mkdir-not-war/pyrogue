@@ -41,7 +41,8 @@ def randomwalk(length):
 			while (not inbounds(tupleadd(current, newdir))):
 				newdir = choice(possiblevecs)
 			fromdirection = fromdirdict[newdir]
-			mapdict[current][(fromdirection+2)%4] = True # set exit to
+			if (i < length-1):
+				mapdict[current][(fromdirection+2)%4] = True # set exit to
 			current = tupleadd(current, newdir)		
 		else:
 			fromdirection = None
