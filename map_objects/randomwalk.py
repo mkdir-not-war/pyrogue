@@ -1,9 +1,9 @@
-height = 40
-width = 45
+height = 10
+width = 15
 
 fromdirdict = {
-	(1, 0) : 0,
-	(-1, 0) : 2,
+	(1, 0) : 2,
+	(-1, 0) : 0,
 	(0, 1) : 1,
 	(0, -1) : 3
 }
@@ -41,7 +41,7 @@ def randomwalk(length):
 			while (not inbounds(tupleadd(current, newdir))):
 				newdir = choice(possiblevecs)
 			fromdirection = fromdirdict[newdir]
-			mapdict[current][3 - fromdirection] = True # set exit to
+			mapdict[current][(fromdirection+2)%4] = True # set exit to
 			current = tupleadd(current, newdir)		
 		else:
 			fromdirection = None
@@ -51,8 +51,41 @@ def randomwalk(length):
 def printmap(mapdict):
 	print("MAP: ")
 	for y in range(height):
-		row = ['.' if (x, y) in mapdict.keys() else '#' for x in range(width)]
+		topexitrow = []
+		row = []
+		botexitrow = []
+
+		for x in range(width):
+			if ((x,y) in mapdict):
+				exits = mapdict[(x, y)]
+				if (exits[1]):
+					topexitrow.append('  ^  ')
+				else:
+					topexitrow.append('     ')
+				if (exits[3]):
+					botexitrow.append('  v  ')
+				else:
+					botexitrow.append('     ')
+				if (exits[0]):
+					if (exits[2]):
+						row.append(' <.> ')
+					else:
+						row.append('  .> ')
+				else:
+					if (exits[2]):
+						row.append(' <.  ')
+					else:
+						row.append('  .  ')
+			else:
+				topexitrow.append('     ')
+				row.append('     ')
+				botexitrow.append('     ')
+
+
+		print(''.join(topexitrow))
 		print(''.join(row))
+		print(''.join(botexitrow))
+		print()
 	print()
 
 def main():
