@@ -1,4 +1,4 @@
-height = 10
+height = 8
 width = 15
 
 fromdirdict = {
@@ -32,11 +32,11 @@ def randomwalk(length):
 	for i in range(length):
 		if (current in mapdict and fromdirection != None):
 			mapdict[current][fromdirection] = True # set exit from
-		else:
+		elif (not current in mapdict):
 			mapdict[current] = [False, False, False, False]
 			if (fromdirection != None):
 				mapdict[current][fromdirection] = True # set exit from
-		if (i % 100 != 0):
+		if (i % 8 != 0):
 			newdir = choice(possiblevecs)
 			while (not inbounds(tupleadd(current, newdir))):
 				newdir = choice(possiblevecs)
