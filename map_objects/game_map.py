@@ -18,8 +18,10 @@ tree = Tile('tree', False, True, cost=3)
 min_monsters_per_room = 0
 max_monsters_per_room = 12
 
+lair_radius = 8
+
 class GameMap:
-	def __init__(self, width, height, floor):
+	def __init__(self, width, height, floor, islair=False):
 		self.width = width
 		self.height = height
 		self.size = width * height
@@ -32,6 +34,12 @@ class GameMap:
 		self.exits['south'] = None
 		self.exits['west'] = None
 		self.exits['east'] = None
+
+		# tuple lair position if this map holds the lair
+		self.islair = islair
+		self.stairs = {}
+		self.stairs['up'] = None
+		self.stairs['down'] = None
 
 		# includes corpses as well as live monsters
 		self.monsters = None
@@ -85,22 +93,34 @@ class GameMap:
 		result = self.gettilesbytype('ground')
 		return result
 
-	def gettilesbytype(self, tilename):
+	def gettilesbytype(self, *tilenames):
 		result = []
 		for i in range(self.width):
 			for j in range(self.height):
 				point = tuple([i, j])
-				if (self.tilename(*point) == tilename):
+				if (self.tilename(*point) in tilenames):
 					result.append(point)
 		# order: top to bottom -> left to right
 		return result
 
-	def generate(self, biomename, top=False, bottom=False, left=False, right=False):
+	def generate(self, 
+		biomename, 
+		stairsdown=False,
+		top=False, bottom=False, left=False, right=False):
+
 		self.biomename = biomename
 		self.tiles = self.cellularautomata().tiles
 		self.costmap = self.getcostmap()
 		self.exploredmap = [False] * self.size
 		self.setexits(top=top, bottom=bottom, left=left, right=right)
+		self.setstairs(False, stairsdown)
+		self.costmap = self.getcostmap()
+
+	def generatelair(self):
+		self.tiles = self.lairtiles().tiles
+		self.costmap = self.getcostmap()
+		self.exploredmap = [False] * self.size
+		self.setstairs(True, True)
 		self.costmap = self.getcostmap()
 
 	# clear entity list of previous room's entities, 
@@ -113,8 +133,16 @@ class GameMap:
 		if (self.monsters is None):
 			self.spawnmonsters(entities, monsterspawner)
 
-		# place stairs, enemies and items into entities list
+		# spawn items
+		if (self.items is None):
+			pass
+
+		# place stairs, doors, enemies and items into entities list
 		entities.extend(self.spawnexits())
+		if (not self.stairs['down'] is None):
+			entities.extend(self.spawnstairsdown())
+		if (not self.stairs['up'] is None and not self.islair):
+			entities.extend(self.spawnstairsup())
 		entities.extend(self.monsters)
 		entities.extend(self.items)
 
@@ -163,8 +191,7 @@ class GameMap:
 
 	# just set player's position upon entering new floor
 	def spawnplayer(self, player, entities):
-		candidatetiles = self.getgroundtiles()
-		candidatetiles.extend(self.gettilesbytype('tree'))
+		candidatetiles = self.gettilesbytype('ground', 'tree')
 		assert(len(candidatetiles) > 0)
 
 		pos = random.choice(candidatetiles)
@@ -182,29 +209,36 @@ class GameMap:
 			# otherwise, the spot is good for spawning
 			break
 
+		# hole dropped player here, therefore, the way back up is here
+		self.stairs['up'] = pos
+		self.settile(pos, ground)
 		player.x, player.y = pos
 
 	def spawnmonsters(self, entities, spawner):
 		self.monsters = []
-		nummonsters = random.randint(min_monsters_per_room,
-			int(max_monsters_per_room / 2)) + \
-			random.randint(0, int(max_monsters_per_room / 2))
-		groundtiles = []
-		if (nummonsters > 0):
-			groundtiles = [tile for tile in \
-				self.getgroundtiles() if \
-				self.adjacenttile(tile, ground) >= 4 and \
-				self.inbounds(tile[0], tile[1], buffer=4)]
+
+		if (self.islair):
+			pass
 		else:
-			return
+			nummonsters = random.randint(min_monsters_per_room,
+				int(max_monsters_per_room / 2)) + \
+				random.randint(0, int(max_monsters_per_room / 2))
+			groundtiles = []
+			if (nummonsters > 0):
+				groundtiles = [tile for tile in \
+					self.getgroundtiles() if \
+					self.adjacenttile(tile, ground) >= 4 and \
+					self.inbounds(tile[0], tile[1], buffer=4)]
+			else:
+				return
 
-		for i in range(nummonsters):
-			pos = random.choice(groundtiles)
+			for i in range(nummonsters):
+				pos = random.choice(groundtiles)
 
-			if not any([entity for entity in entities 
-				if entity.x == pos[0] and entity.y == pos[1]]):
-				monster = spawner.getbasicmonster(self, pos)
-				self.monsters.append(monster)
+				if not any([entity for entity in entities 
+					if entity.x == pos[0] and entity.y == pos[1]]):
+					monster = spawner.getbasicmonster(self, pos)
+					self.monsters.append(monster)
 
 	def check_can_reach_exit(self, pos):
 		for e in self.exits.values():
@@ -215,6 +249,81 @@ class GameMap:
 				return True
 		return False
 
+	# must first have generated tiles and set exits
+	# if lair, set in specific positons
+	def setstairs(self, up, down):
+		if (down == True):
+			if (self.islair):
+				pos = (int(self.width / 2), 
+					int(self.height / 2) - lair_radius)
+				self.stairs['down'] = pos
+				self.settile(pos, ground)
+			else:
+				# assume no swimming
+				tiles = self.gettilesbytype('ground', 'tree') 
+				pos = random.choice(tiles)
+
+				# make sure no stairs overlapping doors
+				while(1):
+					for e in self.exits.values():
+						if e == pos:
+							pos = random.choice(tiles)
+							continue
+					break
+
+				self.stairs['down'] = pos
+				self.settile(pos, ground)
+
+				# make sure stairs are reachable
+				exit = random.choice(
+					[e for e in self.exits.values() if not e is None])
+				path = astar(
+					pos, exit, self, travonly=False, 
+					costs=True, buffer=0)
+				for tile in path:
+					# only change walls (assumes player can swim)
+					if (self.tilename(tile[0], tile[1]) == 'wall'):
+						self.settile(tile, ground)
+					# change water too (if player can't swim)
+					if (self.tilename(tile[0], tile[1]) == 'water'):
+						self.settile(tile, tree)
+
+		if (up == True):
+			if (self.islair):
+				pos = (int(self.width / 2), 
+					int(self.height / 2) + lair_radius)
+				self.stairs['up'] = pos
+				self.settile(pos, ground)
+			else:
+				# normal floor, stairs up are set when player is spawned
+				pass
+
+	def spawnstairsup(self):
+		result = []
+		if (not self.stairs['up'] is None):
+			# doesn't block because you have to use rope to go back up
+			stairs_up = Entity(
+				self.stairs['up'][0], self.stairs['up'][1], 
+				'*', libtcod.white, 
+				'Light filtering from above', blocks=False, 
+				stairs=Stairs())
+			result.append(stairs_up)
+		return result
+
+	# only spawn stairs down in lair once boss is dead
+	def spawnstairsdown(self):
+		result = []
+		if (not self.stairs['down'] is None):
+			stairs_comp = None
+
+			stairs_down = Entity(
+				self.stairs['down'][0], self.stairs['down'][1], 
+				'X', libtcod.white, 
+				'Deep hole', blocks=True, 
+				stairs=stairs_comp)
+			result.append(stairs_down)
+		return result
+
 	def spawnexits(self):
 		result = []
 		for exit in self.exits:
@@ -222,10 +331,21 @@ class GameMap:
 			if (pos != None):
 				if (self.tileblocked(pos[0], pos[1])):
 					self.settile(pos, ground)
-				door = Entity(pos[0], pos[1], 
-					'>', libtcod.white, 
-					'Door', blocks=True, door=Door(exit))
-				result.append(door)
+				if (exit == 'up'):
+					stairs = Entity(pos[0], pos[1], 
+						'>', libtcod.white, 
+						'Lair Exit', blocks=True, door=Door(exit))
+					result.append(stairs)
+				if (exit == 'down'):
+					stairs = Entity(pos[0], pos[1], 
+						'>', libtcod.white, 
+						'Lair Entrance', blocks=True, door=Door(exit))
+					result.append(stairs)
+				else:
+					door = Entity(pos[0], pos[1], 
+						'>', libtcod.white, 
+						'Door', blocks=True, door=Door(exit))
+					result.append(door)
 		return result
 
 	def setexits(self, top=False, left=False, right=False, bottom=False):
@@ -265,6 +385,15 @@ class GameMap:
 				# change water too (if player can't swim)
 				if (self.tilename(pos[0], pos[1]) == 'water'):
 					self.settile(pos, tree)
+
+	def lairtiles(self):
+		newmap = GameMap(self.width, self.height, self.floor)
+		for i in range(1, self.width-1):
+			for j in range(1, self.height-1):
+				newmap.settile(tuple([i, j]), wall)
+				if ((i**2 + j**2) < (lair_radius**2)):
+					newmap.settile(tuple([i, j]), ground)
+		return newmap
 
 	def cellularautomata(self):
 		newmap = GameMap(self.width, self.height, self.floor)

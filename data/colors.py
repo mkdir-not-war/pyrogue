@@ -12,8 +12,8 @@ colors = {
 		'hp_bar_high': libtcod.chartreuse,
 		'hp_bar_medium': libtcod.gold,
 		'hp_bar_low': libtcod.flame,
-		'monster_color_0': libtcod.dark_green,
-		'monster_color_1': libtcod.desaturated_green,
-		'monster_color_2': libtcod.darker_green,
-		'monster_color_3': libtcod.darkest_green
+		'monster_color_0': libtcod.dark_blue,
+		'monster_color_1': libtcod.desaturated_blue,
+		'monster_color_2': libtcod.darker_blue,
+		'monster_color_3': libtcod.darkest_blue
 	}

@@ -3,8 +3,13 @@ import components.ai as AI
 from render_functions import RenderOrder
 
 class Entity:
-	def __init__(self, x, y, char, color, name, render_order=RenderOrder.CORPSE,
-		description=None, blocks=False, fighter=None, ai=None, door=None):
+	def __init__(self, x, y, char, color, name, 
+		render_order=RenderOrder.CORPSE,
+		description=None, blocks=False, 
+		fighter=None, 
+		ai=None, 
+		door=None,
+		stairs=None):
 
 		self.x = x
 		self.y = y
@@ -16,6 +21,7 @@ class Entity:
 		self.fighter = fighter
 		self.ai = ai
 		self.door = door
+		self.stairs = stairs
 
 		if self.fighter:
 			self.fighter.owner = self
@@ -25,6 +31,9 @@ class Entity:
 
 		if self.door:
 			self.door.owner = self
+
+		if self.stairs:
+			self.stairs.owner = self
 
 		# default description to name
 		if description is None:

@@ -127,6 +127,8 @@ def main():
 						fov_map = initialize_fov(game_world.currmap)
 						fov_recompute = True
 						con.clear()
+					elif target.stairs:
+						pass
 					else:
 						attack_results = player.fighter.attacktarget(
 							target, player.fighter.attacks[0])

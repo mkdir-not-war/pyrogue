@@ -6,18 +6,22 @@ from map_objects.monsterspawner import MonsterSpawner
 from map_objects.biome import biomes
 
 FLOOR_HEIGHT = 8
-FLOOR_WIDTH = 15
+FLOOR_WIDTH = 16
+AVG_DIST = int((FLOOR_WIDTH + FLOOR_HEIGHT) / 2)
+
 
 SMALL_FLOOR = 8 # avg 5 rooms, path=3
 MEDIUM_FLOOR = 20 # avg 12 rooms, path=6
-LARGE_FLOOR = 50 # avg 22 rooms, path=16
-HUGE_FLOOR = 80 # avg 32 rooms, path=20
+LARGE_FLOOR = 50 # avg 22 rooms, path=12
+HUGE_FLOOR = 80 # avg 32 rooms, path=12
+LABYRINTHINE_FLOOR = 150 # avg 40 rooms, path=12
 
 FLOOR_TIERS = {
 	0 : SMALL_FLOOR,
 	5: MEDIUM_FLOOR,
 	20: LARGE_FLOOR,
-	35: HUGE_FLOOR
+	35: HUGE_FLOOR,
+	50: LABYRINTHINE_FLOOR
 }
 
 def getfloortier(floor):
@@ -60,6 +64,7 @@ class GameWorld:
 		self.current_floor = 0
 		self.current_room = (0, 0)
 		self.currmap = None
+		self.floors_rooms = []
 		self.floor_rooms = {}
 		self.next_floor_rooms = {}
 		self.monsterspawner = MonsterSpawner()
@@ -69,7 +74,10 @@ class GameWorld:
 		self.loadnextfloor(player, entities)
 
 	# assumes you can only go down, never back up
-	def loadnextfloor(self, player, entities):
+	def loadnextfloor(self, player, entities, startroom=None):
+		if (currmap.islair):
+			pass
+		else:
 		self.current_floor += 1
 		# wait for next_floor_rooms to finish generating, if it's not done yet
 		self.floor_rooms = self.next_floor_rooms.copy()
@@ -78,8 +86,14 @@ class GameWorld:
 		self.next_floor_rooms = {}
 		self.currmap.enter(player, entities, self.monsterspawner)
 		self.currmap.spawnplayer(player, entities)
-		# set boss lair entrance in same room as player
 		# kick off generation of next next floor in new thread
+
+	def getnextmapdown(self, floor, islair):
+		if islair:
+			pass
+		else:
+			pass
+
 
 	def floorwidth(self, floor):
 		return int(sqrt(len(floor)))
@@ -100,7 +114,7 @@ class GameWorld:
 				mapdict[current] = [False, False, False, False, biomename]
 				if (fromdirection != None):
 					mapdict[current][fromdirection] = True # set exit from
-			if (i % (max(MIN_PATH_LENGTH, walklength/3)) != 0):
+			if (i % min(max(MIN_PATH_LENGTH, walklength/3), AVG_DIST) != 0):
 				newdir = random.choice(possiblevecs)
 				while (not inbounds(
 					FLOOR_WIDTH, FLOOR_HEIGHT, tupleadd(current, newdir))):
@@ -114,12 +128,19 @@ class GameWorld:
 				fromdirection = None
 				current = MIDPOINT
 
+		# Pick a room for the lair that isn't the start room
+		lairroom = random.choice(list(mapdict.keys()))
+		while (lairroom == MIDPOINT):
+			lairroom = random.choice(list(mapdict.keys()))
+
 		for room in mapdict.keys():
+			haslair =  (room == lairroom)
 			self.next_floor_rooms[room] = GameMap(
 				self.roomwidth, self.roomheight, floor)
 			room_data = mapdict[room]
 			self.next_floor_rooms[room].generate(
 					room_data[4],
+					stairsdown=haslair,
 					top=room_data[FROM_DIR['north']],
 					bottom=room_data[FROM_DIR['south']],
 					right=room_data[FROM_DIR['east']],
@@ -141,10 +162,20 @@ class GameWorld:
 		elif (exitdir == 'east'):
 			entrancedir = 'west'
 			roomvec = (1, 0)
+
+		elif (exitdir == 'up'):
+			entrancedir = 'down'
+		elif (exitdir == 'down'):
+			entrancedir = 'up'
+
 		# assume that you're not going out of bounds
-		nextroomx, nextroomy = tupleadd(self.current_room, roomvec)
-		nextroom = self.floor_rooms.get((nextroomx, nextroomy))
-		nextroom.enter(
-			player, entities, self.monsterspawner, entrancedir=entrancedir)
-		self.current_room = (nextroomx, nextroomy)
-		self.currmap = nextroom	
+		if (not roomvec is None):
+			nextroomx, nextroomy = tupleadd(self.current_room, roomvec)
+			nextroom = self.floor_rooms.get((nextroomx, nextroomy))
+			nextroom.enter(
+				player, entities, 
+				self.monsterspawner, entrancedir=entrancedir)
+			self.current_room = (nextroomx, nextroomy)
+			self.currmap = nextroom	
+		else:
+			# moving between floor and lair
