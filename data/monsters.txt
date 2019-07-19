@@ -1,34 +1,13 @@
 {
-    "TROLLS": {
-        "char": "t",
+    "BIRDS": {
+        "char": "b",
         "0" : {
-            "name" : "Young Troll",
-            "fov_radius" : 7,
-            "attentiveness" : 5,
+            "name" : "Terror Bird",
+            "fov_radius" : 6,
+            "attentiveness" : 8,
             "truesight" : "False",
-            "hp" : 10,
-            "defense" : 1,
-            "spdefense" : 1,
-            "attack" : 3,
-            "spattack" : 1,
-            "speed" : 4,
-            "attacks" : {
-                "0" : {
-                    "name" : "Claws", 
-                    "atk_power" : 4, 
-                    "min_range" : 1, 
-                    "max_range" : 1, 
-                    "atk_type" : "physical"
-                }
-            },
-            "prey" : "Player,Young Orc"
-        },
-        "1" : {
-            "name" : "Troll",
-            "fov_radius" : 7,
-            "attentiveness" : 5,
-            "truesight" : "False",
-            "hp" : 11,
+            "swim" : "True",
+            "hp" : 12,
             "defense" : 2,
             "spdefense" : 1,
             "attack" : 4,
@@ -36,45 +15,127 @@
             "speed" : 4,
             "attacks" : {
                 "0" : {
-                    "name" : "Claws", 
-                    "atk_power" : 4, 
-                    "min_range" : 1, 
-                    "max_range" : 1, 
-                    "atk_type" : "physical"
-                }
-            },
-            "prey" : "Player,Young Orc,Orc"
-        }
-    },
-    "ORCS": {
-        "char": "o",
-        "0" : {
-            "name" : "Young Orc",
-            "fov_radius" : 7,
-            "attentiveness" : 5,
-            "truesight" : "False",
-            "hp" : 8,
-            "defense" : 1,
-            "spdefense" : 1,
-            "attack" : 3,
-            "spattack" : 1,
-            "speed" : 6,
-            "attacks" : {
-                "0" : {
-                    "name" : "Club", 
+                    "name" : "Talons", 
                     "atk_power" : 3, 
                     "min_range" : 1, 
                     "max_range" : 1, 
                     "atk_type" : "physical"
                 }
             },
-            "prey" : "Player"
+            "prey" : "Player,Young Goblin"
         },
         "1" : {
-            "name" : "Orc",
-            "fov_radius" : 7,
-            "attentiveness" : 5,
+            "name" : "Cockatrice",
+            "fov_radius" : 6,
+            "attentiveness" : 6,
             "truesight" : "False",
+            "swim" : "True",
+            "hp" : 15,
+            "defense" : 3,
+            "spdefense" : 2,
+            "attack" : 5,
+            "spattack" : 1,
+            "speed" : 4,
+            "attacks" : {
+                "0" : {
+                    "name" : "Talons", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin"
+        },
+        "2" : {
+            "name" : "Harpy",
+            "fov_radius" : 8,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
+            "hp" : 6,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 7,
+            "attacks" : {
+                "0" : {
+                    "name" : "Talons", 
+                    "atk_power" : 2, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "physical"
+                },
+                "1" : {
+                    "name" : "Screech", 
+                    "atk_power" : 2, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin,Goblin"
+        },
+        "3" : {
+            "name" : "Red Eagle",
+            "fov_radius" : 7,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
+            "hp" : 20,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 8,
+            "spattack" : 2,
+            "speed" : 8,
+            "attacks" : {
+                "0" : {
+                    "name" : "Talons", 
+                    "atk_power" : 5, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin,Goblin,Terror Bird"
+        },
+        "4" : {
+            "name" : "Griffon",
+            "fov_radius" : 8,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
+            "hp" : 10,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 4,
+            "spattack" : 2,
+            "speed" : 8,
+            "attacks" : {
+                "0" : {
+                    "name" : "Dagger", 
+                    "atk_power" : 4, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                },
+                "1" : {
+                    "name" : "Shortbow", 
+                    "atk_power" : 2, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin,Goblin,Terror Bird,Young Troll"
+        },
+        "5" : {
+            "name" : "Hippogriff",
+            "fov_radius" : 7,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
             "hp" : 9,
             "defense" : 1,
             "spdefense" : 1,
@@ -90,7 +151,377 @@
                     "atk_type" : "physical"
                 }
             },
+            "prey" : "Player,Young Goblin,Goblin,Terror Bird,Young Troll"
+        },
+        "6" : {
+            "name" : "Thunderbird",
+            "fov_radius" : 7,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Talons", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                },
+                "1" : {
+                    "name" : "Call to Lightning", 
+                    "atk_power" : 15, 
+                    "min_range" : 2, 
+                    "max_range" : 3, 
+                    "atk_type" : "special"
+                }
+            },
+            "prey" : "Player,Young Goblin,Goblin,Terror Bird,Young Troll,Troll"
+        },
+        "7" : {
+            "name" : "Roc",
+            "fov_radius" : 7,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin,Goblin,Terror Bird,Young Troll,Troll,Griffon"
+        },
+        "8" : {
+            "name" : "Winged Ra",
+            "fov_radius" : 7,
+            "attentiveness" : 8,
+            "truesight" : "False",
+            "swim" : "True",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Death Grasp", 
+                    "atk_power" : 12, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "special"
+                },
+                "1" : {
+                    "name" : "Fireball", 
+                    "atk_power" : 22, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "special"
+                }
+            },
+            "prey" : "Player,Young Goblin,Goblin,Terror Bird,Young Troll,Troll,Griffon"
+        }
+    },
+    "TROLLS": {
+        "char": "t",
+        "0" : {
+            "name" : "Young Troll",
+            "fov_radius" : 6,
+            "attentiveness" : 3,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 12,
+            "defense" : 2,
+            "spdefense" : 1,
+            "attack" : 4,
+            "spattack" : 1,
+            "speed" : 4,
+            "attacks" : {
+                "0" : {
+                    "name" : "Claws", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin"
+        },
+        "1" : {
+            "name" : "Troll",
+            "fov_radius" : 6,
+            "attentiveness" : 3,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 15,
+            "defense" : 3,
+            "spdefense" : 2,
+            "attack" : 5,
+            "spattack" : 1,
+            "speed" : 4,
+            "attacks" : {
+                "0" : {
+                    "name" : "Claws", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Goblin,Young Orc"
+        }
+    },
+    "GOBLINOIDS": {
+        "char": "g",
+        "0" : {
+            "name" : "Young Goblin",
+            "fov_radius" : 7,
+            "attentiveness" : 4,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 6,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 7,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player"
+        },
+        "1" : {
+            "name" : "Young Orc",
+            "fov_radius" : 7,
+            "attentiveness" : 4,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 12,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 4,
+            "spattack" : 2,
+            "speed" : 5,
+            "attacks" : {
+                "0" : {
+                    "name" : "Shortsword", 
+                    "atk_power" : 4, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                },
+                "1" : {
+                    "name" : "Rock Throw", 
+                    "atk_power" : 1, 
+                    "min_range" : 2, 
+                    "max_range" : 4, 
+                    "atk_type" : "physical"
+                }
+            },
             "prey" : "Player,Young Troll"
+        },
+        "2" : {
+            "name" : "Adult Goblin",
+            "fov_radius" : 8,
+            "attentiveness" : 6,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 6,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 7,
+            "attacks" : {
+                "0" : {
+                    "name" : "Shortbow", 
+                    "atk_power" : 2, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Troll"
+        },
+        "3" : {
+            "name" : "Adult Orc",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 20,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 8,
+            "spattack" : 2,
+            "speed" : 8,
+            "attacks" : {
+                "0" : {
+                    "name" : "Sword", 
+                    "atk_power" : 5, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                },
+                "1" : {
+                    "name" : "Rock Throw", 
+                    "atk_power" : 2, 
+                    "min_range" : 2, 
+                    "max_range" : 4, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Troll,Troll"
+        },
+        "4" : {
+            "name" : "Red Cap Goblin",
+            "fov_radius" : 8,
+            "attentiveness" : 6,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 10,
+            "defense" : 2,
+            "spdefense" : 2,
+            "attack" : 4,
+            "spattack" : 2,
+            "speed" : 8,
+            "attacks" : {
+                "0" : {
+                    "name" : "Dagger", 
+                    "atk_power" : 4, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                },
+                "1" : {
+                    "name" : "Shortbow", 
+                    "atk_power" : 2, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Troll,Troll"
+        },
+        "5" : {
+            "name" : "Bugbear",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Troll,Troll"
+        },
+        "6" : {
+            "name" : "Hobgoblin",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Troll,Troll"
+        },
+        "7" : {
+            "name" : "Bugbear Warrior",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Club", 
+                    "atk_power" : 3, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "physical"
+                }
+            },
+            "prey" : "Player,Young Troll,Troll"
+        },
+        "8" : {
+            "name" : "Fade-Touched Hobgoblin",
+            "fov_radius" : 7,
+            "attentiveness" : 5,
+            "truesight" : "False",
+            "swim" : "False",
+            "hp" : 9,
+            "defense" : 1,
+            "spdefense" : 1,
+            "attack" : 3,
+            "spattack" : 1,
+            "speed" : 6,
+            "attacks" : {
+                "0" : {
+                    "name" : "Death Grasp", 
+                    "atk_power" : 12, 
+                    "min_range" : 1, 
+                    "max_range" : 1, 
+                    "atk_type" : "special"
+                },
+                "1" : {
+                    "name" : "Fireball", 
+                    "atk_power" : 22, 
+                    "min_range" : 2, 
+                    "max_range" : 6, 
+                    "atk_type" : "special"
+                }
+            },
+            "prey" : "Player,Young Troll,Troll"
         }
     },
     "BOSSES": {
@@ -100,6 +531,7 @@
             "fov_radius" : 20,
             "attentiveness" : 12,
             "truesight" : "False",
+            "swim" : "False",
             "hp" : 30,
             "defense" : 1,
             "spdefense" : 1,
@@ -122,6 +554,7 @@
             "fov_radius" : 20,
             "attentiveness" : 12,
             "truesight" : "False",
+            "swim" : "False",
             "hp" : 40,
             "defense" : 3,
             "spdefense" : 1,
@@ -144,6 +577,7 @@
             "fov_radius" : 24,
             "attentiveness" : 18,
             "truesight" : "True",
+            "swim" : "False",
             "hp" : 60,
             "defense" : 5,
             "spdefense" : 1,

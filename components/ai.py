@@ -18,7 +18,7 @@ class AIStates(Enum):
 	SEARCHING = 3
 
 class BasicMonster:
-	def __init__(self, game_map, truesight=False,
+	def __init__(self, game_map, truesight=False, swim=False,
 		attentiveness=5, fov_radius=7, prey=['Player']):
 		self.aistate = AIStates.IDLE
 		self.statefuncs = {
@@ -34,6 +34,7 @@ class BasicMonster:
 		self.attentiveness = attentiveness
 		self.lastknownpos = None
 		self.path = False
+		self.swim = swim ############################ path using this ###########
 
 		self.truesight = truesight
 		self.fov_map = initialize_fov(game_map)

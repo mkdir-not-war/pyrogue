@@ -22,9 +22,13 @@ every 5 floors and an extra for the floors past the primary.
 
 '''
 
+percent_bottomlevel_spawn = 0.05
 percent_lowerlevel_spawn = 0.2
-percent_currentlevel_spawn = 0.7
-percent_higherlevel_spawn = 0.1
+percent_currentlevel_spawn = 0.6
+percent_higherlevel_spawn = 0.13
+percent_toplevel_spawn = 0.02
+
+max_monster_level = 8
 
 class MonsterSpawner():
 	def __init__(self):
@@ -73,11 +77,13 @@ class MonsterSpawner():
 		speciesname = speciesdict.get(speciesindex)
 
 		# pick a level
-		avglevelonfloor = min(int(floor / 5), 8)
+		avglevelonfloor = min(int(floor / 5), max_monster_level)
 		levelspectrum = {
+			max(avglevelonfloor-1, 0) : percent_bottomlevel_spawn, 
 			max(avglevelonfloor-1, 0) : percent_lowerlevel_spawn, 
 			avglevelonfloor : percent_currentlevel_spawn, 
-			avglevelonfloor+1 : percent_higherlevel_spawn
+			min(avglevelonfloor+1, max_monster_level) : percent_higherlevel_spawn,
+			min(avglevelonfloor+1, max_monster_level) : percent_toplevel_spawn
 		}
 		levels = list(levelspectrum.keys())
 		levelprobs = [levelspectrum[l] for l in levels]
@@ -97,6 +103,7 @@ class MonsterSpawner():
 		speed = thismonsterdata.get("speed")
 		name = thismonsterdata.get("name")
 		prey = thismonsterdata.get("prey")
+		swim = (thismonsterdata.get("swim") == "True")
 		char = species.get("char")
 		color = colors.get(self.monsterdata.get("colors").get(monsterlevel))
 
@@ -113,11 +120,18 @@ class MonsterSpawner():
 
 		fighter_component = Fighter(
 			hp=hp, 
-			defense=defense, spdefense=spdefense, 
-			attack=attack, spattack=spattack, 
+			defense=defense, 
+			spdefense=spdefense, 
+			attack=attack, 
+			spattack=spattack, 
 			speed=speed,
 			attacks=attacks)
-		ai_component = BasicMonster(game_map, prey=prey)
+		ai_component = BasicMonster(game_map, 
+			prey=prey, 
+			swim=swim, 
+			truesight=truesight, 
+			fov_radius=fov_radius,
+			attentiveness=attentiveness)
 		monster = Entity(pos[0], pos[1], 
 			char, 
 			color, 
