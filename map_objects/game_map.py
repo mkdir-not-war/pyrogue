@@ -16,7 +16,7 @@ water = Tile('water', True, False, cost=6)
 tree = Tile('tree', False, True, cost=3)
 
 min_monsters_per_room = 0
-max_monsters_per_room = 12
+max_monsters_per_room = 10
 
 lair_radius = 8
 
@@ -241,7 +241,6 @@ class GameMap:
 			nummonsters = random.randint(min_monsters_per_room,
 				int(max_monsters_per_room / 2)) + \
 				random.randint(0, int(max_monsters_per_room / 2))
-			nummonsters = 0 ############################################
 			groundtiles = []
 			if (nummonsters > 0):
 				groundtiles = [tile for tile in \

@@ -126,7 +126,7 @@ class GameWorld:
 
 		# Pick a room for the lair that isn't the start room
 		room_with_lair = random.choice(list(mapdict.keys()))
-		while (room_with_lair != MIDPOINT):
+		while (room_with_lair == MIDPOINT):
 			room_with_lair = random.choice(list(mapdict.keys()))
 		self.lairroom.generatelair()
 
