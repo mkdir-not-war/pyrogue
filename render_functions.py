@@ -66,8 +66,9 @@ def render_all(con, panel, entities, player, game_map, message_log,
 		for y in range(game_map.height):
 			for x in range(game_map.width):
 				visible = libtcod.map_is_in_fov(fov_map, x, y)
+				visible = True
 				name = game_map.tilename(x, y)
-
+		
 				if visible:
 					if name == 'wall':
 						libtcod.console_set_char_background(
@@ -107,7 +108,7 @@ def render_all(con, panel, entities, player, game_map, message_log,
 		entities, key=lambda x: x.render_order.value)
 
 	for entity in entities_in_render_order:
-		draw_entity(con, entity, game_map, fov_map)
+		draw_entity(con, entity, game_map, fov_map, showall=True)
 
 	libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 

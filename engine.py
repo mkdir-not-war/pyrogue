@@ -129,7 +129,7 @@ def main():
 						con.clear()
 					elif target.stairs:
 						pass
-					else:
+					elif target.fighter:
 						attack_results = player.fighter.attacktarget(
 							target, player.fighter.attacks[0])
 						player_turn_results.extend(attack_results)

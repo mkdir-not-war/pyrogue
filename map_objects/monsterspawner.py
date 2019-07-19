@@ -25,8 +25,8 @@ every 5 floors and an extra for the floors past the primary.
 percent_bottomlevel_spawn = 0.05
 percent_lowerlevel_spawn = 0.2
 percent_currentlevel_spawn = 0.6
-percent_higherlevel_spawn = 0.13
-percent_toplevel_spawn = 0.02
+percent_higherlevel_spawn = 0.12
+percent_toplevel_spawn = 0.03
 
 max_monster_level = 8
 

@@ -69,15 +69,15 @@ class GameWorld:
 		self.next_floor_rooms = {}
 		self.monsterspawner = MonsterSpawner()
 
+		self.lairroom = GameMap(
+			self.roomwidth, self.roomheight, 0, islair=True)
+
 	def loadfirstfloor(self, player, entities):
 		self.generatenextfloorrooms(self.current_floor+1)
 		self.loadnextfloor(player, entities)
 
 	# assumes you can only go down, never back up
-	def loadnextfloor(self, player, entities, startroom=None):
-		if (currmap.islair):
-			pass
-		else:
+	def loadnextfloor(self, player, entities):
 		self.current_floor += 1
 		# wait for next_floor_rooms to finish generating, if it's not done yet
 		self.floor_rooms = self.next_floor_rooms.copy()
@@ -88,12 +88,8 @@ class GameWorld:
 		self.currmap.spawnplayer(player, entities)
 		# kick off generation of next next floor in new thread
 
-	def getnextmapdown(self, floor, islair):
-		if islair:
-			pass
-		else:
-			pass
-
+	def loadpreviousfloor(self, player, entities):
+		pass
 
 	def floorwidth(self, floor):
 		return int(sqrt(len(floor)))
@@ -129,12 +125,13 @@ class GameWorld:
 				current = MIDPOINT
 
 		# Pick a room for the lair that isn't the start room
-		lairroom = random.choice(list(mapdict.keys()))
-		while (lairroom == MIDPOINT):
-			lairroom = random.choice(list(mapdict.keys()))
+		room_with_lair = random.choice(list(mapdict.keys()))
+		while (room_with_lair != MIDPOINT):
+			room_with_lair = random.choice(list(mapdict.keys()))
+		self.lairroom.generatelair()
 
 		for room in mapdict.keys():
-			haslair =  (room == lairroom)
+			haslair =  (room == room_with_lair)
 			self.next_floor_rooms[room] = GameMap(
 				self.roomwidth, self.roomheight, floor)
 			room_data = mapdict[room]
@@ -177,5 +174,18 @@ class GameWorld:
 				self.monsterspawner, entrancedir=entrancedir)
 			self.current_room = (nextroomx, nextroomy)
 			self.currmap = nextroom	
-		else:
-			# moving between floor and lair
+		elif exitdir == 'down':
+			# moving into lair
+			nextroom = self.lairroom.copy()
+			nextroom.enter(
+				player, entities,
+				self.monsterspawner, entrancedir=entrancedir)
+			self.currmap = nextroom
+		elif exitdir == 'up':
+			# moving from lair back into floor
+			nextroom = self.floor_rooms.get(
+				(self.current_room[0], self.current_room[1]))
+			nextroom.enter(
+				player, entities, 
+				self.monsterspawner, entrancedir=entrancedir)
+			self.currmap = nextroom	

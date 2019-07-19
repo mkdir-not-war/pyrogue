@@ -34,6 +34,8 @@ class GameMap:
 		self.exits['south'] = None
 		self.exits['west'] = None
 		self.exits['east'] = None
+		self.exits['up'] = None
+		self.exits['down'] = None
 
 		# tuple lair position if this map holds the lair
 		self.islair = islair
@@ -68,6 +70,9 @@ class GameMap:
 		for i in range(self.size):
 			newmap.tiles[i] = self.tiles[i]
 		newmap.exits = self.exits
+		newmap.stairs = self.stairs
+		newmap.exploredmap = self.exploredmap
+		newmap.islair = self.islair
 		return newmap
 
 	def getcostmap(self):
@@ -81,7 +86,6 @@ class GameMap:
 				# walls are finite but super big cost
 				result = self.size
 		if (not canswim):
-			# TODO: entities can drown if they can't swim but try to anyway??
 			if (result == water.cost):
 				result = self.size
 		return result
@@ -125,7 +129,12 @@ class GameMap:
 
 	# clear entity list of previous room's entities, 
 	# fill with this room's entities
-	def enter(self, player, entities, monsterspawner, entrancedir=None):
+	def enter(self, 
+		player, entities, 
+		monsterspawner, 
+		entrancedir=None, 
+		fromlowerfloor=False):
+
 		entities.clear()
 		entities.append(player)
 
@@ -141,13 +150,15 @@ class GameMap:
 		entities.extend(self.spawnexits())
 		if (not self.stairs['down'] is None):
 			entities.extend(self.spawnstairsdown())
-		if (not self.stairs['up'] is None and not self.islair):
+		if (not self.stairs['up'] is None):
 			entities.extend(self.spawnstairsup())
 		entities.extend(self.monsters)
 		entities.extend(self.items)
 
 		if (entrancedir):
 			player.x, player.y = self.exits[entrancedir]
+		elif (fromlowerfloor):
+			player.x, player.y = self.stairs['down']
 
 	def inbounds(self, x, y, buffer=0):
 		return (x < self.width - buffer and
@@ -191,6 +202,11 @@ class GameMap:
 
 	# just set player's position upon entering new floor
 	def spawnplayer(self, player, entities):
+		if (not self.stairs['up'] is None):
+			# already been to this floor
+			player.x, player.y = self.stairs['up']
+			return
+
 		candidatetiles = self.gettilesbytype('ground', 'tree')
 		assert(len(candidatetiles) > 0)
 
@@ -210,19 +226,22 @@ class GameMap:
 			break
 
 		# hole dropped player here, therefore, the way back up is here
-		self.stairs['up'] = pos
-		self.settile(pos, ground)
+		if (self.floor > 1):
+			self.stairs['up'] = pos
+			self.settile(pos, ground)
 		player.x, player.y = pos
 
 	def spawnmonsters(self, entities, spawner):
 		self.monsters = []
 
 		if (self.islair):
-			pass
+			# TODO: Spawn boss monster
+			print('spawn boss monster')
 		else:
 			nummonsters = random.randint(min_monsters_per_room,
 				int(max_monsters_per_room / 2)) + \
 				random.randint(0, int(max_monsters_per_room / 2))
+			nummonsters = 0 ############################################
 			groundtiles = []
 			if (nummonsters > 0):
 				groundtiles = [tile for tile in \
@@ -261,9 +280,14 @@ class GameMap:
 			else:
 				# assume no swimming
 				tiles = self.gettilesbytype('ground', 'tree') 
-				pos = random.choice(tiles)
+				
+				# make sure all adjacent tiles are traversable
+				tiles = [t for t in tiles 
+					if (self.adjacenttile(t, ground) + \
+						self.adjacenttile(t, tree)) >= 8]
 
 				# make sure no stairs overlapping doors
+				pos = random.choice(tiles)
 				while(1):
 					for e in self.exits.values():
 						if e == pos:
@@ -271,14 +295,14 @@ class GameMap:
 							continue
 					break
 
-				self.stairs['down'] = pos
+				# stairs down into a lair are actually an exit/door
+				self.exits['down'] = pos
 				self.settile(pos, ground)
 
 				# make sure stairs are reachable
-				exit = random.choice(
-					[e for e in self.exits.values() if not e is None])
+				roomcenter = (int(self.width / 2), int(self.height / 2))
 				path = astar(
-					pos, exit, self, travonly=False, 
+					pos, roomcenter, self, travonly=False, 
 					costs=True, buffer=0)
 				for tile in path:
 					# only change walls (assumes player can swim)
@@ -292,21 +316,21 @@ class GameMap:
 			if (self.islair):
 				pos = (int(self.width / 2), 
 					int(self.height / 2) + lair_radius)
-				self.stairs['up'] = pos
+				# stairs up in a lair are actually an exit/door
+				self.exits['up'] = pos
 				self.settile(pos, ground)
-			else:
-				# normal floor, stairs up are set when player is spawned
-				pass
 
 	def spawnstairsup(self):
 		result = []
 		if (not self.stairs['up'] is None):
+			stairs_comp = None
+
 			# doesn't block because you have to use rope to go back up
 			stairs_up = Entity(
 				self.stairs['up'][0], self.stairs['up'][1], 
 				'*', libtcod.white, 
 				'Light filtering from above', blocks=False, 
-				stairs=Stairs())
+				stairs=stairs_comp)
 			result.append(stairs_up)
 		return result
 
@@ -328,24 +352,20 @@ class GameMap:
 		result = []
 		for exit in self.exits:
 			pos = self.exits[exit]
+
+			name = 'Door'
+			if (exit == 'up'):
+				name = 'Lair Exit'
+			elif (exit == 'down'):
+				name = 'Lair Entrance'
+
 			if (pos != None):
 				if (self.tileblocked(pos[0], pos[1])):
 					self.settile(pos, ground)
-				if (exit == 'up'):
-					stairs = Entity(pos[0], pos[1], 
-						'>', libtcod.white, 
-						'Lair Exit', blocks=True, door=Door(exit))
-					result.append(stairs)
-				if (exit == 'down'):
-					stairs = Entity(pos[0], pos[1], 
-						'>', libtcod.white, 
-						'Lair Entrance', blocks=True, door=Door(exit))
-					result.append(stairs)
-				else:
-					door = Entity(pos[0], pos[1], 
-						'>', libtcod.white, 
-						'Door', blocks=True, door=Door(exit))
-					result.append(door)
+				door = Entity(pos[0], pos[1], 
+					'>', libtcod.white, 
+					name, blocks=True, door=Door(exit))
+				result.append(door)
 		return result
 
 	def setexits(self, top=False, left=False, right=False, bottom=False):
@@ -375,6 +395,9 @@ class GameMap:
 		# find path (through walls!) from each exit to another exit, 
 		# make each tile along the path ground if it's a wall
 		roomcenter = (int(self.width / 2), int(self.height / 2))
+		centertile = self.tilename(*roomcenter)
+		if (centertile == 'wall' or centertile == 'water'):
+			self.settile(roomcenter, ground)
 		for e in newexits:
 			path = astar(
 				e, roomcenter, self, travonly=False, costs=True, buffer=0)
@@ -388,10 +411,13 @@ class GameMap:
 
 	def lairtiles(self):
 		newmap = GameMap(self.width, self.height, self.floor)
+		roomcenter = (int(self.width / 2), int(self.height / 2))
 		for i in range(1, self.width-1):
 			for j in range(1, self.height-1):
 				newmap.settile(tuple([i, j]), wall)
-				if ((i**2 + j**2) < (lair_radius**2)):
+				if (((roomcenter[0]-i)**2 + \
+					(roomcenter[1]-j)**2) < \
+					(lair_radius**2)):
 					newmap.settile(tuple([i, j]), ground)
 		return newmap
 
