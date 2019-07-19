@@ -254,7 +254,6 @@ class GameMap:
 
 		# find path (through walls!) from each exit to another exit, 
 		# make each tile along the path ground if it's a wall
-		assert(len(newexits) >= 2) 
 		roomcenter = (int(self.width / 2), int(self.height / 2))
 		for e in newexits:
 			path = astar(

@@ -14,8 +14,8 @@ from map_objects.game_map import GameMap
 from map_objects.game_world import GameWorld
 
 def main():
-	screen_width = 80
-	screen_height = 50
+	screen_width = 80 # /4 = 20
+	screen_height = 50 # /4 ~= 12
 
 	# Map panel parameters
 	map_width = 45
