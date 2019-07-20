@@ -84,7 +84,11 @@ def main():
 
 		# compute field of vision
 		if fov_recompute:
-			recompute_fov(fov_map, player.x, player.y, fov_radius, 
+			if game_world.currmap.islair:
+				current_fov_radius = 20
+			else:
+				current_fov_radius = fov_radius
+			recompute_fov(fov_map, player.x, player.y, current_fov_radius, 
 				fov_light_walls, fov_algorithm)
 
 		# draw screen
@@ -126,7 +130,7 @@ def main():
 							target.door.direction)
 						fov_map = initialize_fov(game_world.currmap)
 						fov_recompute = True
-						con.clear()
+						con.clear(fg=(0, 0, 0))
 					elif target.stairs:
 						pass
 					elif target.fighter:
@@ -161,6 +165,11 @@ def main():
 				if dead_entity == player:
 					message, game_state = kill_player(dead_entity)
 				else:
+					if (dead_entity.char == '@'):
+						# dead boss, spawn stairs, update world
+						game_world.bosses_cleared[game_world.current_floor] = True
+						entities.extend(
+							game_world.currmap.spawnstairsdown())
 					message = kill_monster(dead_entity)
 
 				message_log.add_message(message)
@@ -182,6 +191,11 @@ def main():
 							if dead_entity == player:
 								message, game_state = kill_player(dead_entity)
 							else:
+								if (dead_entity.char == '@'):
+									# dead boss, spawn stairs, update world
+									game_world.bosses_cleared[game_world.current_floor] = True
+									entities.extend(
+										game_world.currmap.spawnstairsdown())
 								message = kill_monster(dead_entity)
 
 							message_log.add_message(message)

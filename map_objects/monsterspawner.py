@@ -65,6 +65,11 @@ class MonsterSpawner():
 			'9' : 'monster_color_3'
 		}
 
+	def getbossmonster(self, game_map, pos):
+		monsterlevel = game_map.floor
+		return self.getmonsterfromdata(
+			game_map, pos, 'BOSSES', monsterlevel)
+
 	def getbasicmonster(self, game_map, pos):
 		# map variables
 		floor = game_map.floor
@@ -89,6 +94,10 @@ class MonsterSpawner():
 		levelprobs = [levelspectrum[l] for l in levels]
 		monsterlevel = str(choices(levels, levelprobs)[0])
 
+		return self.getmonsterfromdata(
+			game_map, pos, speciesname, monsterlevel)
+
+	def getmonsterfromdata(self, game_map, pos, speciesname, monsterlevel):
 		# get the monster's data
 		species = self.monsterdata.get(speciesname)
 		thismonsterdata = species.get(str(monsterlevel))
@@ -105,7 +114,12 @@ class MonsterSpawner():
 		prey = thismonsterdata.get("prey")
 		swim = (thismonsterdata.get("swim") == "True")
 		char = species.get("char")
-		color = colors.get(self.monsterdata.get("colors").get(monsterlevel))
+		if (speciesname == 'BOSSES'):
+			color = colors.get('boss_monster_color')
+		else:
+			color = colors.get(
+				self.monsterdata.get(
+				"colors").get(monsterlevel))
 
 		# create the monster
 		attacks = []

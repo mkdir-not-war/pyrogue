@@ -15,5 +15,6 @@ colors = {
 		'monster_color_0': libtcod.dark_blue,
 		'monster_color_1': libtcod.desaturated_blue,
 		'monster_color_2': libtcod.darker_blue,
-		'monster_color_3': libtcod.darkest_blue
+		'monster_color_3': libtcod.darkest_blue,
+		'boss_monster_color': libtcod.black
 	}

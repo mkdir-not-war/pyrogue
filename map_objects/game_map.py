@@ -18,7 +18,7 @@ tree = Tile('tree', False, True, cost=3)
 min_monsters_per_room = 0
 max_monsters_per_room = 10
 
-lair_radius = 8
+lair_radius = 9
 
 class GameMap:
 	def __init__(self, width, height, floor, islair=False):
@@ -46,7 +46,7 @@ class GameMap:
 		# includes corpses as well as live monsters
 		self.monsters = None
 
-		self.items = []
+		self.items = None
 
 		self.biomename = None
 		self.costmap = [] # set in generate
@@ -55,6 +55,10 @@ class GameMap:
 	def initialize_tiles(self):
 		tiles = [wall] * self.size
 		return tiles
+
+	def clearentities(self):
+		self.monsters = None
+		self.items = None
 
 	def tileblocked(self, x, y):
 		if (not self.inbounds(x, y) or 
@@ -69,10 +73,11 @@ class GameMap:
 		newmap = GameMap(self.width, self.height, self.floor)
 		for i in range(self.size):
 			newmap.tiles[i] = self.tiles[i]
-		newmap.exits = self.exits
-		newmap.stairs = self.stairs
-		newmap.exploredmap = self.exploredmap
+		newmap.exits = self.exits.copy()
+		newmap.stairs = self.stairs.copy()
+		newmap.exploredmap = self.exploredmap[:]
 		newmap.islair = self.islair
+		newmap.costmap = self.costmap[:]
 		return newmap
 
 	def getcostmap(self):
@@ -133,22 +138,25 @@ class GameMap:
 		player, entities, 
 		monsterspawner, 
 		entrancedir=None, 
-		fromlowerfloor=False):
+		fromlowerfloor=False,
+		bossalive=True):
 
 		entities.clear()
 		entities.append(player)
 
 		# spawn monsters when first enter a room (only sets self.monsters)
 		if (self.monsters is None):
-			self.spawnmonsters(entities, monsterspawner)
+			self.spawnmonsters(
+				entities, monsterspawner, bossalive=bossalive)
 
 		# spawn items
 		if (self.items is None):
-			pass
+			self.items = [] ##############################
 
 		# place stairs, doors, enemies and items into entities list
 		entities.extend(self.spawnexits())
-		if (not self.stairs['down'] is None):
+		livemonsters = [1 for monster in self.monsters if monster.char != '%']
+		if (not self.stairs['down'] is None and len(livemonsters) == 0):
 			entities.extend(self.spawnstairsdown())
 		if (not self.stairs['up'] is None):
 			entities.extend(self.spawnstairsup())
@@ -231,16 +239,18 @@ class GameMap:
 			self.settile(pos, ground)
 		player.x, player.y = pos
 
-	def spawnmonsters(self, entities, spawner):
+	def spawnmonsters(self, entities, spawner, bossalive=True):
 		self.monsters = []
 
-		if (self.islair):
-			# TODO: Spawn boss monster
-			print('spawn boss monster')
+		if (self.islair and bossalive):
+			roomcenter = (int(self.width / 2), int(self.height / 2))
+			monster = spawner.getbossmonster(self, roomcenter)
+			self.monsters.append(monster)
 		else:
 			nummonsters = random.randint(min_monsters_per_room,
 				int(max_monsters_per_room / 2)) + \
 				random.randint(0, int(max_monsters_per_room / 2))
+			#nummonsters = 0 ############################################
 			groundtiles = []
 			if (nummonsters > 0):
 				groundtiles = [tile for tile in \

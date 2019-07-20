@@ -143,7 +143,8 @@ def draw_entity(con, entity, game_map, fov_map, showall=False):
 	if (libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or 
 		(entity.door and 
 		game_map.exploredmap[entity.x + game_map.width * entity.y]) or
-		showall):
+		showall or
+		game_map.islair):
 		libtcod.console_set_default_foreground(con, entity.color)
 		libtcod.console_put_char(
 			con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
