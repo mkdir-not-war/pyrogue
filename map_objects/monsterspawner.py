@@ -75,12 +75,6 @@ class MonsterSpawner():
 		floor = game_map.floor
 		biomename = game_map.biomename
 
-		# pick a species
-		speciesdict = biomes.get(biomename).params.get("monsterspecies")
-		speciesoptions = list(speciesdict.keys())
-		speciesindex = choice(speciesoptions)
-		speciesname = speciesdict.get(speciesindex)
-
 		# pick a level
 		avglevelonfloor = min(int(floor / 5), max_monster_level)
 		levelspectrum = {
@@ -94,12 +88,27 @@ class MonsterSpawner():
 		levelprobs = [levelspectrum[l] for l in levels]
 		monsterlevel = str(choices(levels, levelprobs)[0])
 
-		return self.getmonsterfromdata(
+		# pick a species
+		speciesdict = biomes.get(biomename).params.get("monsterspecies")
+		speciesoptions = list(speciesdict.keys())
+		speciesindex = choice(speciesoptions)
+		speciesname = speciesdict.get(speciesindex)
+
+		monster = self.getmonsterfromdata(
 			game_map, pos, speciesname, monsterlevel)
+		while (not monster):
+			speciesindex = choice(speciesoptions)
+			speciesname = speciesdict.get(speciesindex)
+			monster = self.getmonsterfromdata(
+				game_map, pos, speciesname, monsterlevel)
+		return monster
 
 	def getmonsterfromdata(self, game_map, pos, speciesname, monsterlevel):
 		# get the monster's data
 		species = self.monsterdata.get(speciesname)
+		if (not str(monsterlevel) in species):
+			return False
+
 		thismonsterdata = species.get(str(monsterlevel))
 		fov_radius = thismonsterdata.get("fov_radius")
 		attentiveness = thismonsterdata.get("attentiveness")
