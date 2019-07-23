@@ -3,6 +3,7 @@ from math import sqrt
 import tcod as libtcod
 
 from components.door import Door
+from components.stairs import Stairs
 from components.fighter import Fighter
 from components.ai import BasicMonster, astar
 
@@ -332,7 +333,7 @@ class GameMap:
 	def spawnstairsup(self):
 		result = []
 		if (not self.stairs['up'] is None):
-			stairs_comp = None
+			stairs_comp = Stairs()
 
 			# doesn't block because you have to use rope to go back up
 			stairs_up = Entity(
@@ -347,7 +348,7 @@ class GameMap:
 	def spawnstairsdown(self):
 		result = []
 		if (not self.stairs['down'] is None):
-			stairs_comp = None
+			stairs_comp = Stairs()
 
 			stairs_down = Entity(
 				self.stairs['down'][0], self.stairs['down'][1], 

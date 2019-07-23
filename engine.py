@@ -132,7 +132,10 @@ def main():
 						fov_recompute = True
 						con.clear(fg=(0, 0, 0))
 					elif target.stairs:
-						pass
+						game_world.movetonextfloor(player, entities)
+						fov_map = initialize_fov(game_world.currmap)
+						fov_recompute = True
+						con.clear(fg=(0, 0, 0))
 					elif target.fighter:
 						attack_results = player.fighter.attacktarget(
 							target, player.fighter.attacks[0])

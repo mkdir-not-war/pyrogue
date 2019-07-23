@@ -1,4 +1,6 @@
 import random
+import threading
+
 from entity import Entity
 from math import sqrt
 from map_objects.game_map import GameMap
@@ -61,46 +63,61 @@ class GameWorld:
 	def __init__(self, roomwidth, roomheight):
 		self.roomwidth = roomwidth
 		self.roomheight = roomheight
-		self.current_floor = 0
+		self.current_floor = -1
 		self.current_room = (0, 0)
 		self.currmap = None
-		self.floors_rooms = []
+		self.floors_rooms = [] # all floors
 		self.bosses_cleared = []
-		self.floor_rooms = {}
+		self.floor_rooms = {} # current floor's rooms
 		self.next_floor_rooms = {}
 		self.monsterspawner = MonsterSpawner()
 
-		self.lairroom = GameMap(
-			self.roomwidth, self.roomheight, 0, islair=True)
+		self.nextfloorgen_thread = None
 
 	def loadfirstfloor(self, player, entities):
-		self.generatenextfloorrooms(self.current_floor)
-		self.loadnextfloor(player, entities)
+		self.nextfloorgen_thread = threading.Thread(
+			target=self.generatenextfloorrooms, 
+			args=(len(self.floors_rooms), ))
+		self.nextfloorgen_thread.start()
+		self.movetonextfloor(player, entities)
 
-	# assumes you can only go down, never back up
-	def loadnextfloor(self, player, entities):
-		# wait for next_floor_rooms to finish generating, if it's not done yet
+	def movetonextfloor(self, player, entities):
+		if (self.current_floor+1 == len(self.floors_rooms)):
+			self.nextfloorgen_thread.join()
+			self.floors_rooms.append(self.next_floor_rooms)
+			self.bosses_cleared.append(False)
+
+		self.current_floor += 1
 		self.floor_rooms = self.next_floor_rooms.copy()
 		self.current_room = MIDPOINT
 		self.currmap = self.floor_rooms.get(self.current_room)
 		self.next_floor_rooms = {}
 		self.currmap.enter(player, entities, self.monsterspawner)
 		self.currmap.spawnplayer(player, entities)
-		# kick off generation of next next floor in new thread
 
-	def movetonextfloor(self, player, entities):
-		self.current_floor += 1
+		self.nextfloorgen_thread = threading.Thread(
+			target=self.generatenextfloorrooms, 
+			args=(len(self.floors_rooms), ))
+		self.nextfloorgen_thread.start()
 
 	def movetopreviousfloor(self, player, entities):
-		pass
+		if (self.current_floor <= 0):
+			return
 
-	def floorwidth(self, floor):
-		return int(sqrt(len(floor)))
+		self.current_floor -= 1
+		# we want to reference the floor, not copy it
+		self.floor_rooms = self.next_floors_rooms[self.current_floor]
+		self.current_room = MIDPOINT
+		self.currmap = self.floor_rooms.get(self.current_room)
+		self.next_floor_rooms = {}
+		self.currmap.enter(player, entities, self.monsterspawner)
+		self.currmap.spawnplayer(player, entities)
 
 	# random walk
 	def generatenextfloorrooms(self, floor):
 		walklength = getfloortier(floor)
 		mapdict = {}
+		resultfloor = {}
 		# right, up, left, down
 		possiblevecs = [(0, 1), (1, 0), (-1, 0), (0, -1)]
 		fromdirection = None # 0=left, 1=down, 2=right, 3=up
@@ -129,14 +146,13 @@ class GameWorld:
 
 		# lair is always the same room as start room on a floor
 		room_with_lair = MIDPOINT
-		self.lairroom.generatelair()
 
 		for room in mapdict.keys():
 			haslair =  (room == room_with_lair)
-			self.next_floor_rooms[room] = GameMap(
+			resultfloor[room] = GameMap(
 				self.roomwidth, self.roomheight, floor)
 			room_data = mapdict[room]
-			self.next_floor_rooms[room].generate(
+			resultfloor[room].generate(
 					room_data[4],
 					stairsdown=haslair,
 					top=room_data[FROM_DIR['north']],
@@ -144,10 +160,12 @@ class GameWorld:
 					right=room_data[FROM_DIR['east']],
 					left=room_data[FROM_DIR['west']],
 				)
+		resultfloor['lair'] = GameMap(
+			self.roomwidth, self.roomheight, 0, islair=True)
+		resultfloor['lair'].generatelair()
 
-		# this stuff should probably happen after the thread returns
-		self.floors_rooms.append(self.next_floor_rooms)
-		self.bosses_cleared.append(False)
+		self.next_floor_rooms = resultfloor.copy()
+		
 
 	def movetonextroom(self, player, entities, exitdir):
 		entrancedir = None
@@ -182,7 +200,7 @@ class GameWorld:
 			self.currmap = nextroom	
 		elif exitdir == 'down':
 			# moving into lair
-			nextroom = self.lairroom.copy()
+			nextroom = self.floor_rooms.get('lair')
 			nextroom.enter(
 				player, entities,
 				self.monsterspawner, 
