@@ -9,7 +9,9 @@ class Entity:
 		fighter=None, 
 		ai=None, 
 		door=None,
-		stairs=None):
+		stairs=None,
+		item=None,
+		inventory=None):
 
 		self.x = x
 		self.y = y
@@ -22,6 +24,8 @@ class Entity:
 		self.ai = ai
 		self.door = door
 		self.stairs = stairs
+		self.item = item
+		self.inventory = inventory
 
 		if self.fighter:
 			self.fighter.owner = self
@@ -34,6 +38,12 @@ class Entity:
 
 		if self.stairs:
 			self.stairs.owner = self
+
+		if self.inventory:
+			self.inventory.owner = self
+
+		if self.item:
+			self.item.owner = self
 
 		# default description to name
 		if description is None:
