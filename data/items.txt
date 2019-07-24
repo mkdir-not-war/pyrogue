@@ -1,0 +1,19 @@
+{
+	"PLANTS" :
+	{
+		"0" : 
+		{
+			"name" : "Milkweed",
+			"compounds" : {
+				"Z" : 0
+			}
+		},
+		"1" :
+		{
+			"name" : "Drake Thistle",
+			"compounds" : {
+				"Z" : 0
+			}
+		}
+	}
+}

@@ -269,6 +269,9 @@ class GameMap:
 					monster = spawner.getbasicmonster(self, pos)
 					self.monsters.append(monster)
 
+	def spawnitems(self, entities, spawner):
+		self.items = []
+
 	def check_can_reach_exit(self, pos):
 		for e in self.exits.values():
 			path = False
